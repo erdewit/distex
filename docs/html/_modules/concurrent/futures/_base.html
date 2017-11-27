@@ -1,0 +1,709 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>concurrent.futures._base &#8212; distex 0.5.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">distex</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=erdewit&repo=distex&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Distex documentation</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for concurrent.futures._base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2009 Brian Quinlan. All Rights Reserved.</span>
+<span class="c1"># Licensed to PSF under a Contributor Agreement.</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Brian Quinlan (brian@sweetapp.com)&#39;</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">FIRST_COMPLETED</span> <span class="o">=</span> <span class="s1">&#39;FIRST_COMPLETED&#39;</span>
+<span class="n">FIRST_EXCEPTION</span> <span class="o">=</span> <span class="s1">&#39;FIRST_EXCEPTION&#39;</span>
+<span class="n">ALL_COMPLETED</span> <span class="o">=</span> <span class="s1">&#39;ALL_COMPLETED&#39;</span>
+<span class="n">_AS_COMPLETED</span> <span class="o">=</span> <span class="s1">&#39;_AS_COMPLETED&#39;</span>
+
+<span class="c1"># Possible future states (for internal use by the futures package).</span>
+<span class="n">PENDING</span> <span class="o">=</span> <span class="s1">&#39;PENDING&#39;</span>
+<span class="n">RUNNING</span> <span class="o">=</span> <span class="s1">&#39;RUNNING&#39;</span>
+<span class="c1"># The future was cancelled by the user...</span>
+<span class="n">CANCELLED</span> <span class="o">=</span> <span class="s1">&#39;CANCELLED&#39;</span>
+<span class="c1"># ...and _Waiter.add_cancelled() was called by a worker.</span>
+<span class="n">CANCELLED_AND_NOTIFIED</span> <span class="o">=</span> <span class="s1">&#39;CANCELLED_AND_NOTIFIED&#39;</span>
+<span class="n">FINISHED</span> <span class="o">=</span> <span class="s1">&#39;FINISHED&#39;</span>
+
+<span class="n">_FUTURE_STATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">PENDING</span><span class="p">,</span>
+    <span class="n">RUNNING</span><span class="p">,</span>
+    <span class="n">CANCELLED</span><span class="p">,</span>
+    <span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">,</span>
+    <span class="n">FINISHED</span>
+<span class="p">]</span>
+
+<span class="n">_STATE_TO_DESCRIPTION_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">PENDING</span><span class="p">:</span> <span class="s2">&quot;pending&quot;</span><span class="p">,</span>
+    <span class="n">RUNNING</span><span class="p">:</span> <span class="s2">&quot;running&quot;</span><span class="p">,</span>
+    <span class="n">CANCELLED</span><span class="p">:</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">,</span>
+    <span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">:</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">,</span>
+    <span class="n">FINISHED</span><span class="p">:</span> <span class="s2">&quot;finished&quot;</span>
+<span class="p">}</span>
+
+<span class="c1"># Logger for internal use by the futures package.</span>
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;concurrent.futures&quot;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Error</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for all future-related exceptions.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">CancelledError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The Future was cancelled.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">TimeoutError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The operation exceeded the given deadline.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">_Waiter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Provides the event that wait() and as_completed() block on.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finished_futures</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">add_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finished_futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_exception</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finished_futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_cancelled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finished_futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">_AsCompletedWaiter</span><span class="p">(</span><span class="n">_Waiter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Used by as_completed().&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_AsCompletedWaiter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">_AsCompletedWaiter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_result</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_exception</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">_AsCompletedWaiter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_exception</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_cancelled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">_AsCompletedWaiter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_cancelled</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">_FirstCompletedWaiter</span><span class="p">(</span><span class="n">_Waiter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Used by wait(return_when=FIRST_COMPLETED).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">add_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_result</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_exception</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_exception</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_cancelled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_cancelled</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">_AllCompletedWaiter</span><span class="p">(</span><span class="n">_Waiter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Used by wait(return_when=FIRST_EXCEPTION and ALL_COMPLETED).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_pending_calls</span><span class="p">,</span> <span class="n">stop_on_exception</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_pending_calls</span> <span class="o">=</span> <span class="n">num_pending_calls</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_on_exception</span> <span class="o">=</span> <span class="n">stop_on_exception</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_decrement_pending_calls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_pending_calls</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_pending_calls</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_result</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decrement_pending_calls</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_exception</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_exception</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_on_exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_decrement_pending_calls</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_cancelled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_cancelled</span><span class="p">(</span><span class="n">future</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decrement_pending_calls</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">_AcquireFutures</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A context manager that does an ordered acquire of Future conditions.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">futures</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">futures</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">futures</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">:</span>
+            <span class="n">future</span><span class="o">.</span><span class="n">_condition</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">:</span>
+            <span class="n">future</span><span class="o">.</span><span class="n">_condition</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">_create_and_install_waiters</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">return_when</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">return_when</span> <span class="o">==</span> <span class="n">_AS_COMPLETED</span><span class="p">:</span>
+        <span class="n">waiter</span> <span class="o">=</span> <span class="n">_AsCompletedWaiter</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">return_when</span> <span class="o">==</span> <span class="n">FIRST_COMPLETED</span><span class="p">:</span>
+        <span class="n">waiter</span> <span class="o">=</span> <span class="n">_FirstCompletedWaiter</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pending_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">_state</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">,</span> <span class="n">FINISHED</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_when</span> <span class="o">==</span> <span class="n">FIRST_EXCEPTION</span><span class="p">:</span>
+            <span class="n">waiter</span> <span class="o">=</span> <span class="n">_AllCompletedWaiter</span><span class="p">(</span><span class="n">pending_count</span><span class="p">,</span> <span class="n">stop_on_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">return_when</span> <span class="o">==</span> <span class="n">ALL_COMPLETED</span><span class="p">:</span>
+            <span class="n">waiter</span> <span class="o">=</span> <span class="n">_AllCompletedWaiter</span><span class="p">(</span><span class="n">pending_count</span><span class="p">,</span> <span class="n">stop_on_exception</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid return condition: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">return_when</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">_waiters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">waiter</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">waiter</span>
+
+
+<span class="k">def</span> <span class="nf">_yield_finished_futures</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">waiter</span><span class="p">,</span> <span class="n">ref_collect</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Iterate on the list *fs*, yielding finished futures one by one in</span>
+<span class="sd">    reverse order.</span>
+<span class="sd">    Before yielding a future, *waiter* is removed from its waiters</span>
+<span class="sd">    and the future is removed from each set in the collection of sets</span>
+<span class="sd">    *ref_collect*.</span>
+
+<span class="sd">    The aim of this function is to avoid keeping stale references after</span>
+<span class="sd">    the future is yielded and before the iterator resumes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="n">fs</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">fs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">futures_set</span> <span class="ow">in</span> <span class="n">ref_collect</span><span class="p">:</span>
+            <span class="n">futures_set</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">f</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">_waiters</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">waiter</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">f</span>
+        <span class="c1"># Careful not to keep a reference to the popped value</span>
+        <span class="k">yield</span> <span class="n">fs</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">as_completed</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An iterator over the given futures that yields each as it completes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fs: The sequence of Futures (possibly created by different Executors) to</span>
+<span class="sd">            iterate over.</span>
+<span class="sd">        timeout: The maximum number of seconds to wait. If None, then there</span>
+<span class="sd">            is no limit on the wait time.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        An iterator that yields the given Futures as they complete (finished or</span>
+<span class="sd">        cancelled). If any given Futures are duplicated, they will be returned</span>
+<span class="sd">        once.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TimeoutError: If the entire result iterator could not be generated</span>
+<span class="sd">            before the given timeout.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">timeout</span> <span class="o">+</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">fs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+    <span class="n">total_futures</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">_AcquireFutures</span><span class="p">(</span><span class="n">fs</span><span class="p">):</span>
+        <span class="n">finished</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+                <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span>
+                <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">,</span> <span class="n">FINISHED</span><span class="p">])</span>
+        <span class="n">pending</span> <span class="o">=</span> <span class="n">fs</span> <span class="o">-</span> <span class="n">finished</span>
+        <span class="n">waiter</span> <span class="o">=</span> <span class="n">_create_and_install_waiters</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">_AS_COMPLETED</span><span class="p">)</span>
+    <span class="n">finished</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">finished</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield from</span> <span class="n">_yield_finished_futures</span><span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">waiter</span><span class="p">,</span>
+                                           <span class="n">ref_collect</span><span class="o">=</span><span class="p">(</span><span class="n">fs</span><span class="p">,))</span>
+
+        <span class="k">while</span> <span class="n">pending</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">wait_timeout</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">wait_timeout</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">wait_timeout</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span>
+                            <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> (of </span><span class="si">%d</span><span class="s1">) futures unfinished&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">pending</span><span class="p">),</span> <span class="n">total_futures</span><span class="p">))</span>
+
+            <span class="n">waiter</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">wait_timeout</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">waiter</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+                <span class="n">finished</span> <span class="o">=</span> <span class="n">waiter</span><span class="o">.</span><span class="n">finished_futures</span>
+                <span class="n">waiter</span><span class="o">.</span><span class="n">finished_futures</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">waiter</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+            <span class="c1"># reverse to keep finishing order</span>
+            <span class="n">finished</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="k">yield from</span> <span class="n">_yield_finished_futures</span><span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">waiter</span><span class="p">,</span>
+                                               <span class="n">ref_collect</span><span class="o">=</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">pending</span><span class="p">))</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># Remove waiter from unfinished futures</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">f</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">_waiters</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">waiter</span><span class="p">)</span>
+
+<span class="n">DoneAndNotDoneFutures</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span>
+        <span class="s1">&#39;DoneAndNotDoneFutures&#39;</span><span class="p">,</span> <span class="s1">&#39;done not_done&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_when</span><span class="o">=</span><span class="n">ALL_COMPLETED</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wait for the futures in the given sequence to complete.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fs: The sequence of Futures (possibly created by different Executors) to</span>
+<span class="sd">            wait upon.</span>
+<span class="sd">        timeout: The maximum number of seconds to wait. If None, then there</span>
+<span class="sd">            is no limit on the wait time.</span>
+<span class="sd">        return_when: Indicates when this function should return. The options</span>
+<span class="sd">            are:</span>
+
+<span class="sd">            FIRST_COMPLETED - Return when any future finishes or is</span>
+<span class="sd">                              cancelled.</span>
+<span class="sd">            FIRST_EXCEPTION - Return when any future finishes by raising an</span>
+<span class="sd">                              exception. If no future raises an exception</span>
+<span class="sd">                              then it is equivalent to ALL_COMPLETED.</span>
+<span class="sd">            ALL_COMPLETED -   Return when all futures finish or are cancelled.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A named 2-tuple of sets. The first set, named &#39;done&#39;, contains the</span>
+<span class="sd">        futures that completed (is finished or cancelled) before the wait</span>
+<span class="sd">        completed. The second set, named &#39;not_done&#39;, contains uncompleted</span>
+<span class="sd">        futures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">_AcquireFutures</span><span class="p">(</span><span class="n">fs</span><span class="p">):</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span>
+                   <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">,</span> <span class="n">FINISHED</span><span class="p">])</span>
+        <span class="n">not_done</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span> <span class="o">-</span> <span class="n">done</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">return_when</span> <span class="o">==</span> <span class="n">FIRST_COMPLETED</span><span class="p">)</span> <span class="ow">and</span> <span class="n">done</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DoneAndNotDoneFutures</span><span class="p">(</span><span class="n">done</span><span class="p">,</span> <span class="n">not_done</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">return_when</span> <span class="o">==</span> <span class="n">FIRST_EXCEPTION</span><span class="p">)</span> <span class="ow">and</span> <span class="n">done</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">done</span>
+                   <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">cancelled</span><span class="p">()</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">exception</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">DoneAndNotDoneFutures</span><span class="p">(</span><span class="n">done</span><span class="p">,</span> <span class="n">not_done</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">done</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">fs</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">DoneAndNotDoneFutures</span><span class="p">(</span><span class="n">done</span><span class="p">,</span> <span class="n">not_done</span><span class="p">)</span>
+
+        <span class="n">waiter</span> <span class="o">=</span> <span class="n">_create_and_install_waiters</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">return_when</span><span class="p">)</span>
+
+    <span class="n">waiter</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">f</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">_waiters</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">waiter</span><span class="p">)</span>
+
+    <span class="n">done</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">waiter</span><span class="o">.</span><span class="n">finished_futures</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">DoneAndNotDoneFutures</span><span class="p">(</span><span class="n">done</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span> <span class="o">-</span> <span class="n">done</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Future</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents the result of an asynchronous computation.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes the future. Should not be called by clients.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Condition</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="n">PENDING</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_waiters</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_done_callbacks</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_invoke_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done_callbacks</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;exception calling callback for </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="n">FINISHED</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1"> at </span><span class="si">%#x</span><span class="s1"> state=</span><span class="si">%s</span><span class="s1"> raised </span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                        <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+                        <span class="n">_STATE_TO_DESCRIPTION_MAP</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="p">],</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1"> at </span><span class="si">%#x</span><span class="s1"> state=</span><span class="si">%s</span><span class="s1"> returned </span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                        <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+                        <span class="n">_STATE_TO_DESCRIPTION_MAP</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="p">],</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1"> at </span><span class="si">%#x</span><span class="s1"> state=</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                    <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+                   <span class="n">_STATE_TO_DESCRIPTION_MAP</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Cancel the future if possible.</span>
+
+<span class="sd">        Returns True if the future was cancelled, False otherwise. A future</span>
+<span class="sd">        cannot be cancelled if it is running or has already completed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">RUNNING</span><span class="p">,</span> <span class="n">FINISHED</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="n">CANCELLED</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="o">.</span><span class="n">notify_all</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_invoke_callbacks</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">cancelled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return True if the future was cancelled.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return True if the future is currently executing.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="n">RUNNING</span>
+
+    <span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return True of the future was cancelled or finished executing.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">,</span> <span class="n">FINISHED</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span>
+
+    <span class="k">def</span> <span class="nf">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Attaches a callable that will be called when the future finishes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fn: A callable that will be called with this future as its only</span>
+<span class="sd">                argument when the future completes or is cancelled. The callable</span>
+<span class="sd">                will always be called by a thread in the same process in which</span>
+<span class="sd">                it was added. If the future has already completed or been</span>
+<span class="sd">                cancelled then the callable will be called immediately. These</span>
+<span class="sd">                callables are called in the order that they were added.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">,</span> <span class="n">FINISHED</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_done_callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+                <span class="k">return</span>
+        <span class="n">fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the result of the call that the future represents.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            timeout: The number of seconds to wait for the result if the future</span>
+<span class="sd">                isn&#39;t done. If None, then there is no limit on the wait time.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The result of the call that the future represents.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            CancelledError: If the future was cancelled.</span>
+<span class="sd">            TimeoutError: If the future didn&#39;t finish executing before the given</span>
+<span class="sd">                timeout.</span>
+<span class="sd">            Exception: If the call raised then that exception will be raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">CancelledError</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="n">FINISHED</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_result</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">CancelledError</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="n">FINISHED</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_result</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">exception</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the exception raised by the call that the future represents.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            timeout: The number of seconds to wait for the exception if the</span>
+<span class="sd">                future isn&#39;t done. If None, then there is no limit on the wait</span>
+<span class="sd">                time.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The exception raised by the call that the future represents or None</span>
+<span class="sd">            if the call completed without raising.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            CancelledError: If the future was cancelled.</span>
+<span class="sd">            TimeoutError: If the future didn&#39;t finish executing before the given</span>
+<span class="sd">                timeout.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">CancelledError</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="n">FINISHED</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">CANCELLED_AND_NOTIFIED</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">CancelledError</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="n">FINISHED</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">()</span>
+
+    <span class="c1"># The following methods should only be used by Executors and in tests.</span>
+    <span class="k">def</span> <span class="nf">set_running_or_notify_cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Mark the future as running or process any cancel notifications.</span>
+
+<span class="sd">        Should only be used by Executor implementations and unit tests.</span>
+
+<span class="sd">        If the future has been cancelled (cancel() was called and returned</span>
+<span class="sd">        True) then any threads waiting on the future completing (though calls</span>
+<span class="sd">        to as_completed() or wait()) are notified and False is returned.</span>
+
+<span class="sd">        If the future was not cancelled then it is put in the running state</span>
+<span class="sd">        (future calls to running() will return True) and True is returned.</span>
+
+<span class="sd">        This method should be called by Executor implementations before</span>
+<span class="sd">        executing the work associated with this future. If this method returns</span>
+<span class="sd">        False then the work should not be executed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            False if the Future was cancelled, True otherwise.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: if this method was already called or if set_result()</span>
+<span class="sd">                or set_exception() was called.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="n">CANCELLED</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="n">CANCELLED_AND_NOTIFIED</span>
+                <span class="k">for</span> <span class="n">waiter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_waiters</span><span class="p">:</span>
+                    <span class="n">waiter</span><span class="o">.</span><span class="n">add_cancelled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="c1"># self._condition.notify_all() is not necessary because</span>
+                <span class="c1"># self.cancel() triggers a notification.</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="n">PENDING</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="n">RUNNING</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">&#39;Future </span><span class="si">%s</span><span class="s1"> in unexpected state: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                                <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Future in unexpected state&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the return value of work associated with the future.</span>
+
+<span class="sd">        Should only be used by Executor implementations and unit tests.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="n">result</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="n">FINISHED</span>
+            <span class="k">for</span> <span class="n">waiter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_waiters</span><span class="p">:</span>
+                <span class="n">waiter</span><span class="o">.</span><span class="n">add_result</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="o">.</span><span class="n">notify_all</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_invoke_callbacks</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_exception</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the result of the future as being the given exception.</span>
+
+<span class="sd">        Should only be used by Executor implementations and unit tests.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span> <span class="o">=</span> <span class="n">exception</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="n">FINISHED</span>
+            <span class="k">for</span> <span class="n">waiter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_waiters</span><span class="p">:</span>
+                <span class="n">waiter</span><span class="o">.</span><span class="n">add_exception</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="o">.</span><span class="n">notify_all</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_invoke_callbacks</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Executor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is an abstract base class for concrete asynchronous executors.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Submits a callable to be executed with the given arguments.</span>
+
+<span class="sd">        Schedules the callable to be executed as fn(*args, **kwargs) and returns</span>
+<span class="sd">        a Future instance representing the execution of the callable.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A Future representing the given call.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">iterables</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns an iterator equivalent to map(fn, iter).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fn: A callable that will take as many arguments as there are</span>
+<span class="sd">                passed iterables.</span>
+<span class="sd">            timeout: The maximum number of seconds to wait. If None, then there</span>
+<span class="sd">                is no limit on the wait time.</span>
+<span class="sd">            chunksize: The size of the chunks the iterable will be broken into</span>
+<span class="sd">                before being passed to a child process. This argument is only</span>
+<span class="sd">                used by ProcessPoolExecutor; it is ignored by</span>
+<span class="sd">                ThreadPoolExecutor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An iterator equivalent to: map(func, *iterables) but the calls may</span>
+<span class="sd">            be evaluated out-of-order.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TimeoutError: If the entire result iterator could not be generated</span>
+<span class="sd">                before the given timeout.</span>
+<span class="sd">            Exception: If fn(*args) raises for any values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">timeout</span> <span class="o">+</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="n">fs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="k">for</span> <span class="n">args</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">iterables</span><span class="p">)]</span>
+
+        <span class="c1"># Yield must be hidden in closure so that the futures are submitted</span>
+        <span class="c1"># before the first iterator value is required.</span>
+        <span class="k">def</span> <span class="nf">result_iterator</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># reverse to keep finishing order</span>
+                <span class="n">fs</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+                <span class="k">while</span> <span class="n">fs</span><span class="p">:</span>
+                    <span class="c1"># Careful not to keep a reference to the popped future</span>
+                    <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">fs</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">fs</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">end_time</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+                    <span class="n">future</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">result_iterator</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clean-up the resources associated with the Executor.</span>
+
+<span class="sd">        It is safe to call this method several times. Otherwise, no other</span>
+<span class="sd">        methods can be called after this one.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            wait: If True then shutdown will not return until all running</span>
+<span class="sd">                futures have finished executing and the resources used by the</span>
+<span class="sd">                executor have been reclaimed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2017, Ewald de Wit.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
