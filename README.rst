@@ -1,4 +1,4 @@
-|PyVersion| |Build| |Status| |PyPiVersion| |License|
+|Build| |PyVersion| |Status| |PyPiVersion| |License|
 
 Distex
 ======
@@ -137,6 +137,7 @@ Version 0.5.0
 
 .. |Build| image:: https://travis-ci.org/erdewit/distex.svg?branch=master
    :alt: Build
+   :target: https://travis-ci.org/erdewit/distex
 
 .. |PyVersion| image:: https://img.shields.io/badge/python-3.6+-blue.svg
    :alt:
