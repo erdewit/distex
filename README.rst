@@ -4,7 +4,7 @@ Introduction
 ============
 
 The distex package offers a distributed process pool for Python that uses
-`asyncio <https://docs.python.org/3.6/library/asyncio.html>`_.
+`asyncio <https://docs.python.org/3.6/library/asyncio.html>`_
 to efficiently manage the local and remote worker processes.
 
 Features:
