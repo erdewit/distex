@@ -1,4 +1,4 @@
-|PyVersion| |Status| |PyPiVersion| |License|
+|PyVersion| |Build| |Status| |PyPiVersion| |License|
 
 Distex
 ======
@@ -17,7 +17,6 @@ Features:
   functions and data;
 * Backward compatible with ``concurrent.futures.ProcessPool`` (PEP3148_).
  
-
 
 Installation
 ------------
@@ -135,6 +134,9 @@ Version 0.5.0
 .. |PyPiVersion| image:: https://img.shields.io/pypi/v/distex.svg
    :alt: PyPi
    :target: https://pypi.python.org/pypi/distex
+
+.. |Build| image:: https://travis-ci.org/erdewit/distex.svg?branch=master
+   :alt: Build
 
 .. |PyVersion| image:: https://img.shields.io/badge/python-3.6+-blue.svg
    :alt:
