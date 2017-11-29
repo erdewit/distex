@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Distex documentation &#8212; distex 0.5.0 documentation</title>
+    <title>Distex documentation &#8212; distex 0.5.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.0',
+        VERSION:     '0.5.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Distex" href="index.html" />
+    <link rel="prev" title="Introduction" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -79,14 +79,14 @@
             
   <div class="section" id="distex-documentation">
 <span id="api"></span><h1>Distex documentation<a class="headerlink" href="#distex-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Release 0.5.0.</p>
+<p>Release 0.5.1.</p>
 <div class="toctree-wrapper compound">
 </div>
 <div class="section" id="module-distex.pool">
 <span id="pool"></span><h2>Pool<a class="headerlink" href="#module-distex.pool" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="distex.pool.Pool">
-<em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">Pool</code><span class="sig-paren">(</span><em>num_workers: int = None</em>, <em>hosts=None</em>, <em>qsize: int = 4</em>, <em>initializer=None</em>, <em>initargs: tuple = ()</em>, <em>localhost: str = '0.0.0.0'</em>, <em>localport: int = None</em>, <em>lazy_create: bool = False</em>, <em>worker_loop=&lt;LoopType.default: 0&gt;</em>, <em>func_pickle=&lt;PickleType.dill: 2&gt;</em>, <em>data_pickle=&lt;PickleType.pickle: 0&gt;</em>, <em>loop=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">Pool</code><span class="sig-paren">(</span><em>num_workers: int = None</em>, <em>hosts=None</em>, <em>qsize: int = 4</em>, <em>initializer=None</em>, <em>initargs: tuple = ()</em>, <em>localhost: str = None</em>, <em>localport: int = None</em>, <em>lazy_create: bool = False</em>, <em>worker_loop=&lt;LoopType.default: 0&gt;</em>, <em>func_pickle=&lt;PickleType.dill: 2&gt;</em>, <em>data_pickle=&lt;PickleType.pickle: 0&gt;</em>, <em>loop=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool" title="Permalink to this definition">¶</a></dt>
 <dd><div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Use a non-ssh process pool only in a trusted network environment.
@@ -122,7 +122,7 @@ to create a pool of 2 workers running there:</p>
 host as <code class="docutils literal"><span class="pre">'ssh://username&#64;maxi:10022/8'</span></code>.
 It is not possible to give a password,
 use SSH keys instead: <a class="reference external" href="https://linux.die.net/man/1/ssh-keygen">ssh-keygen</a> can be used to create a key and
-<a class="reference external" href="https://linux.die.net/man/1/ssh-copy-id">ssh-copy-id</a> to copy to it all hosts.</p>
+<a class="reference external" href="https://linux.die.net/man/1/ssh-copy-id">ssh-copy-id</a> to copy it to all hosts.</p>
 <p>Parameters:</p>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">num_workers</span></code>: Number of local process workers. The default of
@@ -213,7 +213,7 @@ in-place to <code class="docutils literal"><span class="pre">func</span></code>.
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
 <p class="last">The function <code class="docutils literal"><span class="pre">func</span></code> is is pickled only once and then cached.
-If it takes arguments that remain constant during the mapping
+If it takes arguments that remain constant during the mapping then
 consider using <code class="docutils literal"><span class="pre">functools.partial</span></code> to bind the function with the
 constant arguments; Then do the mapping with the bound function and
 with lesser arguments. Especially when map uses large constant

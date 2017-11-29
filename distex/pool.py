@@ -98,7 +98,7 @@ class Pool:
     host as ``'ssh://username@maxi:10022/8'``.
     It is not possible to give a password,
     use SSH keys instead: ssh-keygen_ can be used to create a key and
-    ssh-copy-id_ to copy to it all hosts.
+    ssh-copy-id_ to copy it to all hosts.
     """
 
     TimeoutError = concurrent.futures.TimeoutError
@@ -109,7 +109,7 @@ class Pool:
             qsize: int=4,
             initializer=None,
             initargs: tuple=(),
-            localhost: str='0.0.0.0',
+            localhost: str=None,
             localport: int=None,
             lazy_create: bool=False,
             worker_loop=LoopType.default,
@@ -216,8 +216,8 @@ class Pool:
         else:
             await self._start_tcp_server()
             await self._start_local_processors(
-                    '-H', self._localhost,
-                    '-p', self._localport,
+                    '-H', self._localhost or '127.0.0.1',
+                    '-p', str(self._localport),
                     '-l', str(self._worker_loop))
 
         tasks = [self._add_server(server) for server in self._hosts]
@@ -241,11 +241,13 @@ class Pool:
 
     async def _start_tcp_server(self):
         # start server that listens on a TCP port
+        localhost = self._localhost or ('0.0.0.0' if self._hosts else
+                '127.0.0.1')
         if not self._localport:
             self._localport = util.get_random_port()
         self._tcp_server = await self._loop.create_server(
                 self._create_worker,
-                self._localhost, self._localport)
+                localhost, self._localport)
         _logger.info(f'Started serving on port {self._localport}')
 
     async def _add_server(self, server):
@@ -387,7 +389,7 @@ class Pool:
         .. tip::
         
            The function ``func`` is is pickled only once and then cached.
-           If it takes arguments that remain constant during the mapping
+           If it takes arguments that remain constant during the mapping then
            consider using ``functools.partial`` to bind the function with the
            constant arguments; Then do the mapping with the bound function and
            with lesser arguments. Especially when map uses large constant
@@ -429,8 +431,8 @@ class Pool:
 
         end_time = None if timeout is None else self._loop.time() + timeout
         tasks = deque()
-        schedule = lambda task: tasks.append(self._loop.create_task(
-                self._run_task(task)))
+        create_task = self._loop.create_task
+        run_task = self._run_task
         input_consumed = False
         do_map = chunksize > 1
         is_sync = all(isinstance(it, collections.abc.Iterable)
@@ -463,7 +465,8 @@ class Pool:
                     # schedule as many tasks as possible
                     for _ in range(self._slots.num_free):
                         args = get_args() if is_sync else await get_args()
-                        schedule((func, args, None, star, do_map))
+                        tasks.append(create_task(run_task(
+                                (func, args, None, star, do_map))))
                 except (StopIteration, StopAsyncIteration):
                     input_consumed = True
 

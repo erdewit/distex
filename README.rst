@@ -116,6 +116,11 @@ Documentation
 Changelog
 ---------
 
+Version 0.5.1
+^^^^^^^^^^^^^
+
+* Fixes for Windows
+
 Version 0.5.0
 ^^^^^^^^^^^^^
 
