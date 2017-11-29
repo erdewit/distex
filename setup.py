@@ -12,7 +12,7 @@ with codecs.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='distex',
-    version='0.5',
+    version='0.5.1',
     description='Async distributed process pool using asyncio',
     long_description=long_description,
     url='https://github.com/erdewit/distex',
