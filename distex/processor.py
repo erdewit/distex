@@ -60,10 +60,9 @@ class Processor(asyncio.Protocol):
                 result = RemoteException(e)
                 success = 0
             del func, args, kwargs
-            resp = self._serializer.create_response(success, result)
+            self._serializer.write_response(
+                    self._transport.write, success, result)
             del result
-            self._transport.write(resp)
-            del resp
 
     def peername(self):
         if self._unix_path:

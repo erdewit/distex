@@ -4,7 +4,7 @@ import dill
 import cloudpickle
 from enum import IntEnum
 
-REQ_HEADER_FMT = '!QQQBBBB'
+REQ_HEADER_FMT = '!IQIBBBB'
 REQ_HEADER_SIZE = struct.calcsize(REQ_HEADER_FMT)
 RESP_HEADER_FMT = '!QB'
 RESP_HEADER_SIZE = struct.calcsize(RESP_HEADER_FMT)
@@ -39,7 +39,7 @@ class Serializer:
             self.ddumps = PICKLE_MODULES[self.data_pickle].dumps
             self.dloads = PICKLE_MODULES[self.data_pickle].loads
 
-    def create_request(self, task):
+    def write_request(self, write, task):
         func, args, kwargs, no_star, do_map = task
         if func is self.last_func:
             f = b''
@@ -57,7 +57,11 @@ class Serializer:
         header = struct.pack(REQ_HEADER_FMT,
                 len(f), len(ar), len(kw), self.func_pickle, self.data_pickle,
                 no_star, do_map)
-        return header + f + ar + kw
+        write(header)
+        if f: write(f)
+        if ar: write(ar)
+        if kw: write(kw)
+        del ar, kw
 
     def get_requests(self, data):
         """
@@ -94,7 +98,7 @@ class Serializer:
             del k
             yield func, args, kwargs, no_star, do_map
 
-    def create_response(self, success, result):
+    def write_response(self, write, success, result):
         if result is None:
             s = b''
         else:
@@ -102,11 +106,11 @@ class Serializer:
                 dumps = PICKLE_MODULES[self.data_pickle].dumps
                 s = dumps(result, -1)
             except Exception as e:
-                s = self.ddumps(SerializeError(str(e)), -1)
+                s = dumps(SerializeError(str(e)), -1)
                 success = 0
         header = struct.pack(RESP_HEADER_FMT, len(s), success)
-        resp = header + s
-        return resp
+        write(header)
+        write(s)
 
     def get_responses(self, data):
         """

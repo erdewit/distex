@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Introduction &#8212; distex 0.5.1 documentation</title>
+    <title>Introduction &#8212; distex 0.5.2 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.1',
+        VERSION:     '0.5.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -85,7 +85,7 @@
 <p><a class="reference external" href="https://travis-ci.org/erdewit/distex"><img alt="Build" src="https://travis-ci.org/erdewit/distex.svg?branch=master" /></a> <img alt="" src="https://img.shields.io/badge/python-3.6+-blue.svg" /> <img alt="" src="https://img.shields.io/badge/status-beta-green.svg" /> <a class="reference external" href="https://pypi.python.org/pypi/distex"><img alt="PyPi" src="https://img.shields.io/pypi/v/distex.svg" /></a> <img alt="" src="https://img.shields.io/badge/license-BSD-blue.svg" /></p>
 <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>The distex package provides a distributed process pool for Python that uses
+<p>The distex package provides a distributed process pool that uses
 <a class="reference external" href="https://docs.python.org/3.6/library/asyncio.html">asyncio</a>
 to efficiently manage the local and remote worker processes.</p>
 <p>Features:</p>
@@ -183,6 +183,13 @@ share the same ssh tunnel.</p>
 </div>
 <div class="section" id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="version-0-5-2">
+<h3>Version 0.5.2<a class="headerlink" href="#version-0-5-2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Optimizations for large data</li>
+<li>Better error handling when result can’t be pickled</li>
+</ul>
+</div>
 <div class="section" id="version-0-5-1">
 <h3>Version 0.5.1<a class="headerlink" href="#version-0-5-1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
