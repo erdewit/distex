@@ -55,8 +55,8 @@ async def chunk_async(ait, chunksize):
 def next_method(it):
     """
     Get the method that yields next value from the given sync or async iterable.
-    Returns (method, is_sync) tuple of the method with boolean if
-    iterable is synchronous or not.
+    Returns (method, is_sync) tuple of the method and a boolean of whether
+    the iterable is synchronous or not.
     """
     if hasattr(it, '__next__'):
         nxt = it.__next__

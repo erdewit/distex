@@ -35,7 +35,6 @@ class Worker:
         self.futures.append(future)
         self.tasks.append(task)
         self.serializer.write_request(self.transport.write, task)
-#         self.transport.write(req)
         return future
 
     def stop(self):

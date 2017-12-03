@@ -99,3 +99,10 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+.project
+.pydevproject
+docs/doctrees/
+.settings/
+tests/test.py
+docs/html/.buildinfo

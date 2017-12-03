@@ -276,7 +276,7 @@ class Pool:
                 sys.executable, '-m', 'distex.processor', *args,
                 stdout=None, stderr=None)
                 for _ in range(self._num_workers)]
-        asyncio.gather(*tasks, loop=self._loop)
+        await asyncio.gather(*tasks, loop=self._loop)
         self._total_workers += self._num_workers
 
     async def _start_remote_processors(self, host, port, num_workers):
@@ -546,8 +546,9 @@ class Pool:
         await self.ready.wait()
 
         await self._drain()
-        tasks = [self.run_async(func, *args, **kwargs)
-                for _ in range(self._total_workers)]
+
+        tasks = [worker.run_task((func, args, kwargs, True, False))
+                for worker in self._workers]
         result = await asyncio.gather(*tasks, loop=self._loop)
         return result
 

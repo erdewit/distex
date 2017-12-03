@@ -9,22 +9,24 @@ class SlotPool:
     __slots__ = ('num_free', 'capacity', '_slots',
             '_loop', '_get_waiters', '_slot_ready_waiter')
 
-    def __init__(self, slots=(), *, loop=None):
+    def __init__(self, *, loop=None):
         self.num_free = 0
         self.capacity = 0
         self._slots = deque()
         self._loop = loop or asyncio.get_event_loop()
         self._get_waiters = deque()
         self._slot_ready_waiter = None
-        self.extend(slots)
 
     def extend(self, slots):
         """
         Add new slots to the pool.
         """
+        if not slots:
+            return
         self.capacity += len(slots)
         self.num_free += len(slots)
-        self._slots.extend(slots)
+        self._slots.appendleft(slots[0])
+        self._slots.extend(slots[1:])
         self._wake_up_next()
 
     def _wake_up_next(self):
