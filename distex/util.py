@@ -8,7 +8,11 @@ from contextlib import suppress
 
 
 async def zip_async(*sync_or_async_iterables):
-    nxts = [_nxt(it) for it in sync_or_async_iterables]
+    """
+    Asynchronous zip: Create iterator that yields the aggregated elements
+    of the given synchronous or asynchronous iterables as tuples.
+    """
+    nxts = [next_method(it) for it in sync_or_async_iterables]
     try:
         while True:
             r = [nxt() if is_sync else await nxt() for nxt, is_sync in nxts]
@@ -18,6 +22,11 @@ async def zip_async(*sync_or_async_iterables):
 
 
 def chunk(it, chunksize):
+    """
+    Create iterator that chunks together the yielded values of the
+    given iterable into tuples of ``chunksize`` long.
+    The last tuple can be shorter if ``it`` is exhausted.
+    """
     while True:
         t = tuple(itertools.islice(it, chunksize))
         if not t:
@@ -26,6 +35,9 @@ def chunk(it, chunksize):
 
 
 async def chunk_async(ait, chunksize):
+    """
+    Same as chunk but for asynchronous iterable.
+    """
     nxt = ait.__aiter__().__anext__
     r = []
     try:
@@ -37,10 +49,15 @@ async def chunk_async(ait, chunksize):
     except (StopIteration, StopAsyncIteration):
         pass
     if r:
-        yield r
+        yield tuple(r)
 
 
-def _nxt(it):
+def next_method(it):
+    """
+    Get the method that yields next value from the given sync or async iterable.
+    Returns (method, is_sync) tuple of the method with boolean if
+    iterable is synchronous or not.
+    """
     if hasattr(it, '__next__'):
         nxt = it.__next__
         is_sync = True

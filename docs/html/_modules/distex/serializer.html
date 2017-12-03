@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>distex.serializer &#8212; distex 0.5.1 documentation</title>
+    <title>distex.serializer &#8212; distex 0.5.2 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.5.1',
+        VERSION:     '0.5.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -80,7 +80,7 @@
 <span class="kn">import</span> <span class="nn">cloudpickle</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">IntEnum</span>
 
-<span class="n">REQ_HEADER_FMT</span> <span class="o">=</span> <span class="s1">&#39;!QQQBBBB&#39;</span>
+<span class="n">REQ_HEADER_FMT</span> <span class="o">=</span> <span class="s1">&#39;!IQIBBBB&#39;</span>
 <span class="n">REQ_HEADER_SIZE</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="n">REQ_HEADER_FMT</span><span class="p">)</span>
 <span class="n">RESP_HEADER_FMT</span> <span class="o">=</span> <span class="s1">&#39;!QB&#39;</span>
 <span class="n">RESP_HEADER_SIZE</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="n">RESP_HEADER_FMT</span><span class="p">)</span>
@@ -115,7 +115,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ddumps</span> <span class="o">=</span> <span class="n">PICKLE_MODULES</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pickle</span><span class="p">]</span><span class="o">.</span><span class="n">dumps</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dloads</span> <span class="o">=</span> <span class="n">PICKLE_MODULES</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pickle</span><span class="p">]</span><span class="o">.</span><span class="n">loads</span>
 
-    <span class="k">def</span> <span class="nf">create_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">write_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">write</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
         <span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">no_star</span><span class="p">,</span> <span class="n">do_map</span> <span class="o">=</span> <span class="n">task</span>
         <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_func</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
@@ -133,7 +133,11 @@
         <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">REQ_HEADER_FMT</span><span class="p">,</span>
                 <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ar</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">kw</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_pickle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_pickle</span><span class="p">,</span>
                 <span class="n">no_star</span><span class="p">,</span> <span class="n">do_map</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">header</span> <span class="o">+</span> <span class="n">f</span> <span class="o">+</span> <span class="n">ar</span> <span class="o">+</span> <span class="n">kw</span>
+        <span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">f</span><span class="p">:</span> <span class="n">write</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ar</span><span class="p">:</span> <span class="n">write</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kw</span><span class="p">:</span> <span class="n">write</span><span class="p">(</span><span class="n">kw</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">ar</span><span class="p">,</span> <span class="n">kw</span>
 
     <span class="k">def</span> <span class="nf">get_requests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -170,7 +174,7 @@
             <span class="k">del</span> <span class="n">k</span>
             <span class="k">yield</span> <span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">no_star</span><span class="p">,</span> <span class="n">do_map</span>
 
-    <span class="k">def</span> <span class="nf">create_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">write_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">write</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
         <span class="k">else</span><span class="p">:</span>
@@ -178,11 +182,11 @@
                 <span class="n">dumps</span> <span class="o">=</span> <span class="n">PICKLE_MODULES</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_pickle</span><span class="p">]</span><span class="o">.</span><span class="n">dumps</span>
                 <span class="n">s</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddumps</span><span class="p">(</span><span class="n">SerializeError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">SerializeError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">success</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">RESP_HEADER_FMT</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">success</span><span class="p">)</span>
-        <span class="n">resp</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">s</span>
-        <span class="k">return</span> <span class="n">resp</span>
+        <span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_responses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

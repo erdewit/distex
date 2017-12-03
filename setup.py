@@ -21,13 +21,13 @@ setup(
     license='BSD',
     classifiers=[
         'Development Status :: 4 - Beta',
+        'Intended Audience :: Science/Research',
         'Intended Audience :: Developers',
-        'Topic :: Office/Business :: Financial :: Investment',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
     ],
-    keywords='python parallel distributed computing pool asyncio',
+    keywords='python asyncio parallel distributed computing process pool task queue',
     packages=['distex'],
     install_requires=['dill', 'cloudpickle'],
 )
