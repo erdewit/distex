@@ -95,7 +95,7 @@ High level architecture
 Distex does not use remote 'task servers'.
 Instead it is done the other way around: A local
 server is started first; Then the local and remote workers are started
-and each of thesm will connect on its own back to the server. When all
+and each of them will connect on its own back to the server. When all
 workers have connected then the pool is ready for duty.
 
 Each worker consists of a single-threaded process that is running
