@@ -136,7 +136,7 @@ class Pool:
           first task is submitted.
         * ``worker_loop``: ``LoopType`` to use for workers.
             0. default (=uvloop when available, proactor on Windows)
-            1. asyncio (standard event loop)
+            1. asyncio (standard selector event loop)
             2. uvloop (Unix only)
             3. proactor (Windows only)
             4. quamash (PyQt)
@@ -177,6 +177,7 @@ class Pool:
         self._unix_server = None
         self._unix_path = ''
         self._ssh_tunnels = []
+        self._procs = []
         self._total_workers = 0
         self._workers = []
         self._slots = SlotPool(loop=self._loop)
@@ -276,7 +277,7 @@ class Pool:
                 sys.executable, '-m', 'distex.processor', *args,
                 stdout=None, stderr=None)
                 for _ in range(self._num_workers)]
-        await asyncio.gather(*tasks, loop=self._loop)
+        self._procs = await asyncio.gather(*tasks, loop=self._loop)
         self._total_workers += self._num_workers
 
     async def _start_remote_processors(self, host, port, num_workers):
@@ -574,11 +575,12 @@ class Pool:
             await self._drain()
         for worker in self._workers:
             worker.stop()
-        if self._unix_server and False:
-            await self._unix_server.wait_closed()
+        for transport, protocol in self._procs:
+            transport.close()
+        if self._unix_server:
+            self._unix_server.close()
             with suppress(FileNotFoundError):
                 os.unlink(self._unix_path)
         if self._tcp_server:
             self._tcp_server.close()
-            await self._tcp_server.wait_closed()
         self._workers = None
