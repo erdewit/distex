@@ -1,4 +1,4 @@
-|Build| |PyVersion| |Status| |PyPiVersion| |License|
+|Build| |PyVersion| |Status| |PyPiVersion| |License| |Docs|
 
 Introduction
 ============
@@ -165,3 +165,6 @@ Version 0.5.0
 .. |License| image:: https://img.shields.io/badge/license-BSD-blue.svg
    :alt:
    
+.. |Docs| image:: https://readthedocs.org/projects/distex/badge/?version=latest
+   :alt: Documentation Status
+   :target: http://distex.readthedocs.io
