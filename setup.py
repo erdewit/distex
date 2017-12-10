@@ -3,8 +3,8 @@ import sys
 import codecs
 from setuptools import setup
 
-if sys.version_info < (3, 6, 0):
-    raise RuntimeError("distex requires Python 3.6 or higher")
+if sys.version_info < (3, 0, 0):
+    raise RuntimeError("distex is for Python 3")
 
 here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:

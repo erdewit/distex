@@ -167,4 +167,4 @@ Version 0.5.0
    
 .. |Docs| image:: https://readthedocs.org/projects/distex/badge/?version=latest
    :alt: Documentation Status
-   :target: http://distex.readthedocs.io
+   :target: http://rawgit.com/erdewit/distex/master/docs/html/api.html

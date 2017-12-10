@@ -106,7 +106,7 @@ class Pool:
     def __init__(self,
             num_workers: int=None,
             hosts=None,
-            qsize: int=4,
+            qsize: int=2,
             initializer=None,
             initargs: tuple=(),
             localhost: str=None,
@@ -125,7 +125,7 @@ class Pool:
           ``[ssh://][username@]hostname[:portnumber]/num_workers``.
         * ``qsize``: Number of pending tasks per worker.
           To improve the throughput of small tasks this can be increased
-          from the default of 4.
+          from the default of 2.
           If no queueing is desired then it can be set to 1. 
         * ``initializer``: Callable to initialize worker processes.
         * ``initargs``: Arguments tuple that is unpacked into the initializer.

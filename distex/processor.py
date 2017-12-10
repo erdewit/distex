@@ -46,7 +46,7 @@ class Processor(asyncio.Protocol):
                         result = [func(*a) for a in args]
                     else:
                         result = [func(a) for a in args]
-                    if hasattr(result[0], '__await__'):
+                    if result and hasattr(result[0], '__await__'):
                         result = [await r for r in result]
                 else:
                     if do_star:
@@ -97,6 +97,7 @@ if __name__ == '__main__':
             type=int, help='0=default 1=asyncio 2=uvloop 3=proactor 4=quamash')
     args = parser.parse_args()
 
+    import sys
     if args.loop == LoopType.default:
         loop = util.get_loop()
     elif args.loop == LoopType.asyncio:
@@ -108,6 +109,8 @@ if __name__ == '__main__':
         loop = asyncio.ProactorEventLoop()
     elif args.loop == LoopType.quamash:
         import quamash
+        import PyQt5.Qt as qt
+        _qapp = qt.QApplication([])
         loop = quamash.QEventLoop()
     asyncio.set_event_loop(loop)
     processor = Processor(args.host, args.port, args.unix_path, loop=loop)

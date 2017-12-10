@@ -86,7 +86,7 @@
 <span id="pool"></span><h2>Pool<a class="headerlink" href="#module-distex.pool" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="distex.pool.Pool">
-<em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">Pool</code><span class="sig-paren">(</span><em>num_workers: int = None</em>, <em>hosts=None</em>, <em>qsize: int = 4</em>, <em>initializer=None</em>, <em>initargs: tuple = ()</em>, <em>localhost: str = None</em>, <em>localport: int = None</em>, <em>lazy_create: bool = False</em>, <em>worker_loop=&lt;LoopType.default: 0&gt;</em>, <em>func_pickle=&lt;PickleType.dill: 2&gt;</em>, <em>data_pickle=&lt;PickleType.pickle: 0&gt;</em>, <em>loop=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">Pool</code><span class="sig-paren">(</span><em>num_workers: int = None</em>, <em>hosts=None</em>, <em>qsize: int = 2</em>, <em>initializer=None</em>, <em>initargs: tuple = ()</em>, <em>localhost: str = None</em>, <em>localport: int = None</em>, <em>lazy_create: bool = False</em>, <em>worker_loop=&lt;LoopType.default: 0&gt;</em>, <em>func_pickle=&lt;PickleType.dill: 2&gt;</em>, <em>data_pickle=&lt;PickleType.pickle: 0&gt;</em>, <em>loop=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool" title="Permalink to this definition">¶</a></dt>
 <dd><div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Use a non-ssh process pool only in a trusted network environment.
@@ -131,7 +131,7 @@ None will use the number of CPUs.</li>
 <code class="docutils literal"><span class="pre">[ssh://][username&#64;]hostname[:portnumber]/num_workers</span></code>.</li>
 <li><code class="docutils literal"><span class="pre">qsize</span></code>: Number of pending tasks per worker.
 To improve the throughput of small tasks this can be increased
-from the default of 4.
+from the default of 2.
 If no queueing is desired then it can be set to 1.</li>
 <li><code class="docutils literal"><span class="pre">initializer</span></code>: Callable to initialize worker processes.</li>
 <li><code class="docutils literal"><span class="pre">initargs</span></code>: Arguments tuple that is unpacked into the initializer.</li>
@@ -144,7 +144,7 @@ first task is submitted.</li>
 <dt><code class="docutils literal"><span class="pre">worker_loop</span></code>: <code class="docutils literal"><span class="pre">LoopType</span></code> to use for workers.</dt>
 <dd><ol class="first last arabic" start="0">
 <li>default (=uvloop when available, proactor on Windows)</li>
-<li>asyncio (standard event loop)</li>
+<li>asyncio (standard selector event loop)</li>
 <li>uvloop (Unix only)</li>
 <li>proactor (Windows only)</li>
 <li>quamash (PyQt)</li>
@@ -359,7 +359,7 @@ concurrent.futures.Executor.</p>
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
       <a href="_sources/api.rst.txt"
