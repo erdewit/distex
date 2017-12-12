@@ -116,6 +116,11 @@ Documentation
 Changelog
 ---------
 
+Version 0.5.4
+^^^^^^^^^^^^^
+
+* Fixed issue #4
+
 Version 0.5.3
 ^^^^^^^^^^^^^
 
