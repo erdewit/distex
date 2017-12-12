@@ -71,7 +71,7 @@ class Serializer:
         data = self.data
         while data:
             l = len(data)
-            if l <= REQ_HEADER_SIZE:
+            if l < REQ_HEADER_SIZE:
                 return
             header = data[:REQ_HEADER_SIZE]
             (func_size, args_size, kwargs_size,

@@ -16,7 +16,7 @@ from . import util
 
 _logger = logging.Logger('distex.Pool')
 
-__all__ = ['Pool', 'RemoteException', 'PickleType', 'LoopType']
+__all__ = ['Pool', 'RemoteException', 'HostSpec', 'PickleType', 'LoopType']
 
 
 class RemoteException(Exception):
@@ -40,6 +40,28 @@ class RemoteException(Exception):
     def _unpickle(exc, tb):
         exc.__cause__ = RemoteException(None, tb)
         return exc
+
+
+class HostSpec:
+    """
+    Remote host specification.
+    """
+    __slots__ = ('num_workers', 'is_ssh', 'host', 'port')
+
+    def __init__(self, url):
+        """
+        Parse the host url string.
+        """
+        front, ssh, back, = url.partition('ssh://')
+        h_p, *nw = (back if ssh else front).split('/')
+        if not h_p:
+            raise ValueError(f'Bad server specification: {url}')
+        if not nw:
+            raise ValueError(f'Specify num_workers for {url}')
+        self.num_workers = int(nw[0])
+        self.host, *port = h_p.split(':')
+        self.port = port[0] if port else '' if ssh else str(util.DEFAULT_PORT)
+        self.is_ssh = bool(ssh)
 
 
 class LoopType(IntEnum):
@@ -209,19 +231,23 @@ class Pool:
             return
         self._create_called = True
 
-        if sys.platform != "win32":
-            await self._start_unix_server()
-            await self._start_local_processors(
-                    '-u', self._unix_path,
-                    '-l', str(self._worker_loop))
-        else:
+        hostSpecs = [HostSpec(host) for host in self._hosts]
+
+        if sys.platform == "win32":
             await self._start_tcp_server()
             await self._start_local_processors(
                     '-H', self._localhost or '127.0.0.1',
                     '-p', str(self._localport),
                     '-l', str(self._worker_loop))
+        else:
+            if not all(spec.is_ssh for spec in hostSpecs):
+                await self._start_tcp_server()
+            await self._start_unix_server()
+            await self._start_local_processors(
+                    '-u', self._unix_path,
+                    '-l', str(self._worker_loop))
 
-        tasks = [self._add_server(server) for server in self._hosts]
+        tasks = [self._add_host(spec) for spec in hostSpecs]
         await asyncio.gather(*tasks, loop=self._loop)
 
         while len(self._workers) < self._total_workers:
@@ -242,6 +268,8 @@ class Pool:
 
     async def _start_tcp_server(self):
         # start server that listens on a TCP port
+        if self._tcp_server:
+            return
         localhost = self._localhost or ('0.0.0.0' if self._hosts else
                 '127.0.0.1')
         if not self._localport:
@@ -251,24 +279,13 @@ class Pool:
                 localhost, self._localport)
         _logger.info(f'Started serving on port {self._localport}')
 
-    async def _add_server(self, server):
-        # parse the server string
-        front, ssh, back, = server.partition('ssh://')
-        h_p, *nw = (back if ssh else front).split('/')
-        if not h_p:
-            raise ValueError(f'Bad server specification: {server}')
-        if not nw:
-            raise ValueError(f'Specify num_workers for {server}')
-        num_workers = int(nw[0])
-        host, *port = h_p.split(':')
-        port = port[0] if port else '' if ssh else '8899'
-
-        if ssh:
-            await self._start_remote_processors_ssh(host, port, num_workers)
+    async def _add_host(self, spec):
+        if spec.is_ssh:
+            await self._start_remote_processors_ssh(
+                    spec.host, spec.port, spec.num_workers)
         else:
-            if not self._tcp_server:
-                await self._start_tcp_server()
-            await self._start_remote_processors(host, port, num_workers)
+            await self._start_remote_processors(
+                    spec.host, spec.port, spec.num_workers)
 
     async def _start_local_processors(self, *args):
         # spawn processors that will connect to our Unix or TCP server
@@ -548,10 +565,10 @@ class Pool:
 
         await self._drain()
 
-        tasks = [worker.run_task((func, args, kwargs, True, False))
+        tasks = [self._run_task((func, args, kwargs, True, False))
                 for worker in self._workers]
-        result = await asyncio.gather(*tasks, loop=self._loop)
-        return result
+        results = await asyncio.gather(*tasks, loop=self._loop)
+        return results
 
     async def _drain(self):
         """

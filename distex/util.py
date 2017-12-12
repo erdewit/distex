@@ -6,6 +6,8 @@ import uuid
 import itertools
 from contextlib import suppress
 
+DEFAULT_PORT = 8899
+
 
 async def zip_async(*sync_or_async_iterables):
     """

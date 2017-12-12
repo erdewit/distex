@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Distex documentation &#8212; distex 0.5.3 documentation</title>
+    <title>Distex documentation &#8212; distex 0.5.4 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.3',
+        VERSION:     '0.5.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -79,7 +79,7 @@
             
   <div class="section" id="distex-documentation">
 <span id="api"></span><h1>Distex documentation<a class="headerlink" href="#distex-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Release 0.5.3.</p>
+<p>Release 0.5.4.</p>
 <div class="toctree-wrapper compound">
 </div>
 <div class="section" id="module-distex.pool">
@@ -291,6 +291,33 @@ concurrent.futures.Executor.</p>
 <dt id="distex.pool.RemoteException">
 <em class="property">exception </em><code class="descclassname">distex.pool.</code><code class="descname">RemoteException</code><span class="sig-paren">(</span><em>exc</em>, <em>tb=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#RemoteException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.RemoteException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Proxy for an exception that occurs remotely while running a task.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="distex.pool.HostSpec">
+<em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">HostSpec</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#HostSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.HostSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remote host specification.</p>
+<p>Parse the host url string.</p>
+<dl class="attribute">
+<dt id="distex.pool.HostSpec.host">
+<code class="descname">host</code><a class="headerlink" href="#distex.pool.HostSpec.host" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="distex.pool.HostSpec.is_ssh">
+<code class="descname">is_ssh</code><a class="headerlink" href="#distex.pool.HostSpec.is_ssh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="distex.pool.HostSpec.num_workers">
+<code class="descname">num_workers</code><a class="headerlink" href="#distex.pool.HostSpec.num_workers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="distex.pool.HostSpec.port">
+<code class="descname">port</code><a class="headerlink" href="#distex.pool.HostSpec.port" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">

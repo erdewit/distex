@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>distex.pool &#8212; distex 0.5.3 documentation</title>
+    <title>distex.pool &#8212; distex 0.5.4 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.5.3',
+        VERSION:     '0.5.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -92,7 +92,7 @@
 
 <span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">(</span><span class="s1">&#39;distex.Pool&#39;</span><span class="p">)</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Pool&#39;</span><span class="p">,</span> <span class="s1">&#39;RemoteException&#39;</span><span class="p">,</span> <span class="s1">&#39;PickleType&#39;</span><span class="p">,</span> <span class="s1">&#39;LoopType&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Pool&#39;</span><span class="p">,</span> <span class="s1">&#39;RemoteException&#39;</span><span class="p">,</span> <span class="s1">&#39;HostSpec&#39;</span><span class="p">,</span> <span class="s1">&#39;PickleType&#39;</span><span class="p">,</span> <span class="s1">&#39;LoopType&#39;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="RemoteException"><a class="viewcode-back" href="../../api.html#distex.pool.RemoteException">[docs]</a><span class="k">class</span> <span class="nc">RemoteException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -116,6 +116,28 @@
     <span class="k">def</span> <span class="nf">_unpickle</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
         <span class="n">exc</span><span class="o">.</span><span class="n">__cause__</span> <span class="o">=</span> <span class="n">RemoteException</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">tb</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">exc</span></div>
+
+
+<div class="viewcode-block" id="HostSpec"><a class="viewcode-back" href="../../api.html#distex.pool.HostSpec">[docs]</a><span class="k">class</span> <span class="nc">HostSpec</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remote host specification.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;num_workers&#39;</span><span class="p">,</span> <span class="s1">&#39;is_ssh&#39;</span><span class="p">,</span> <span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="s1">&#39;port&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse the host url string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">front</span><span class="p">,</span> <span class="n">ssh</span><span class="p">,</span> <span class="n">back</span><span class="p">,</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;ssh://&#39;</span><span class="p">)</span>
+        <span class="n">h_p</span><span class="p">,</span> <span class="o">*</span><span class="n">nw</span> <span class="o">=</span> <span class="p">(</span><span class="n">back</span> <span class="k">if</span> <span class="n">ssh</span> <span class="k">else</span> <span class="n">front</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">h_p</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Bad server specification: </span><span class="si">{url}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nw</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Specify num_workers for </span><span class="si">{url}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nw</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="o">*</span><span class="n">port</span> <span class="o">=</span> <span class="n">h_p</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">port</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">ssh</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">util</span><span class="o">.</span><span class="n">DEFAULT_PORT</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_ssh</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">ssh</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="LoopType"><a class="viewcode-back" href="../../api.html#distex.pool.LoopType">[docs]</a><span class="k">class</span> <span class="nc">LoopType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
@@ -285,19 +307,23 @@
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_called</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">!=</span> <span class="s2">&quot;win32&quot;</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_unix_server</span><span class="p">()</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_local_processors</span><span class="p">(</span>
-                    <span class="s1">&#39;-u&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unix_path</span><span class="p">,</span>
-                    <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="n">hostSpecs</span> <span class="o">=</span> <span class="p">[</span><span class="n">HostSpec</span><span class="p">(</span><span class="n">host</span><span class="p">)</span> <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hosts</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;win32&quot;</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_tcp_server</span><span class="p">()</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_local_processors</span><span class="p">(</span>
                     <span class="s1">&#39;-H&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localhost</span> <span class="ow">or</span> <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span>
                     <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="p">),</span>
                     <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">is_ssh</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">hostSpecs</span><span class="p">):</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_tcp_server</span><span class="p">()</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_unix_server</span><span class="p">()</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_local_processors</span><span class="p">(</span>
+                    <span class="s1">&#39;-u&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unix_path</span><span class="p">,</span>
+                    <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span><span class="p">))</span>
 
-        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_add_server</span><span class="p">(</span><span class="n">server</span><span class="p">)</span> <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hosts</span><span class="p">]</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_add_host</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">hostSpecs</span><span class="p">]</span>
         <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
 
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_workers</span><span class="p">:</span>
@@ -318,6 +344,8 @@
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_start_tcp_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># start server that listens on a TCP port</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp_server</span><span class="p">:</span>
+            <span class="k">return</span>
         <span class="n">localhost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localhost</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;0.0.0.0&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hosts</span> <span class="k">else</span>
                 <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="p">:</span>
@@ -327,24 +355,13 @@
                 <span class="n">localhost</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="p">)</span>
         <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Started serving on port </span><span class="si">{self._localport}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_add_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">):</span>
-        <span class="c1"># parse the server string</span>
-        <span class="n">front</span><span class="p">,</span> <span class="n">ssh</span><span class="p">,</span> <span class="n">back</span><span class="p">,</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;ssh://&#39;</span><span class="p">)</span>
-        <span class="n">h_p</span><span class="p">,</span> <span class="o">*</span><span class="n">nw</span> <span class="o">=</span> <span class="p">(</span><span class="n">back</span> <span class="k">if</span> <span class="n">ssh</span> <span class="k">else</span> <span class="n">front</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">h_p</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Bad server specification: </span><span class="si">{server}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">nw</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Specify num_workers for </span><span class="si">{server}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">num_workers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nw</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">host</span><span class="p">,</span> <span class="o">*</span><span class="n">port</span> <span class="o">=</span> <span class="n">h_p</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
-        <span class="n">port</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">port</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">ssh</span> <span class="k">else</span> <span class="s1">&#39;8899&#39;</span>
-
-        <span class="k">if</span> <span class="n">ssh</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_remote_processors_ssh</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">num_workers</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_add_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_remote_processors_ssh</span><span class="p">(</span>
+                    <span class="n">spec</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">num_workers</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp_server</span><span class="p">:</span>
-                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_tcp_server</span><span class="p">()</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_remote_processors</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">num_workers</span><span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_remote_processors</span><span class="p">(</span>
+                    <span class="n">spec</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">num_workers</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_start_local_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="c1"># spawn processors that will connect to our Unix or TCP server</span>
@@ -624,10 +641,10 @@
 
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drain</span><span class="p">()</span>
 
-        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">worker</span><span class="o">.</span><span class="n">run_task</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_task</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="p">]</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span></div>
+        <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span></div>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_drain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

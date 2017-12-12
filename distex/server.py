@@ -4,7 +4,7 @@ import asyncio
 import logging
 import argparse
 
-from .util import logToConsole
+from . import util
 
 _logger = logging.Logger('distex.Server')
 
@@ -17,7 +17,7 @@ class Server:
     Use only in a trusted network environment.
     """
 
-    def __init__(self, host='0.0.0.0', port=8899, loop=None):
+    def __init__(self, host='0.0.0.0', port=util.DEFAULT_PORT, loop=None):
         self._host = host
         self._port = port
         self._loop = loop or asyncio.get_event_loop()
@@ -67,11 +67,11 @@ if __name__ == '__main__':
             formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--host', '-H', dest='host', default='0.0.0.0',
             type=str, help='local host to serve from')
-    parser.add_argument('--port', '-p', dest='port', default=8899,
+    parser.add_argument('--port', '-p', dest='port', default=util.DEFAULT_PORT,
             type=int, help='port number to serve from')
     args = parser.parse_args()
 
-    logToConsole()
+    util.logToConsole()
 
     server = Server(args.host, args.port)
     server.run()
