@@ -97,7 +97,6 @@ if __name__ == '__main__':
             type=int, help='0=default 1=asyncio 2=uvloop 3=proactor 4=quamash')
     args = parser.parse_args()
 
-    import sys
     if args.loop == LoopType.default:
         loop = util.get_loop()
     elif args.loop == LoopType.asyncio:

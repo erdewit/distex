@@ -40,8 +40,7 @@ class PoolTest(unittest.TestCase):
     def setUp(self):
         warnings.simplefilter("always")
 
-        self.pool = Pool(1, loop=loop, lazy_create=True)
-#         self.pool.set_pickle(2, 0)
+        self.pool = Pool(4, loop=loop, lazy_create=True)
         self.reps = 100
         self.x = [i for i in range(self.reps)]
         self.y = [i * i for i in range(self.reps)]
@@ -56,6 +55,7 @@ class PoolTest(unittest.TestCase):
 
     def test_run_coro(self):
         with warnings.catch_warnings(record=True) as w:
+
             async def add(a, b):
                 await asyncio.sleep(0.001)
                 return a + b
@@ -99,7 +99,6 @@ class PoolTest(unittest.TestCase):
                     2 * self.x[:self.pool.total_workers() + 1])
             pids = loop.run_until_complete(self.pool.run_on_all_async(getpid))
             self.assertEqual(self.pool.total_workers(), len(set(pids)))
-            list(interference)
 
             self.assertNoWarnings(w)
 
@@ -165,6 +164,7 @@ class PoolTest(unittest.TestCase):
         async def coro():
             return [v async for v in self.pool.map_async(g,
                     self.x, self.y, self.z)]
+
         with warnings.catch_warnings(record=True) as w:
             expected = list(map(g, self.x, self.y, self.z))
             actual = loop.run_until_complete(coro())

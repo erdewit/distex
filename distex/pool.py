@@ -268,8 +268,6 @@ class Pool:
 
     async def _start_tcp_server(self):
         # start server that listens on a TCP port
-        if self._tcp_server:
-            return
         localhost = self._localhost or ('0.0.0.0' if self._hosts else
                 '127.0.0.1')
         if not self._localport:
@@ -517,7 +515,7 @@ class Pool:
         try:
             success, result = await worker.run_task(task)
         finally:
-            self._slots.put(worker, worker.tasks)
+            self._slots.put(worker, not(worker.tasks))
         if success:
             return result
         raise result
@@ -565,10 +563,13 @@ class Pool:
 
         await self._drain()
 
-        tasks = [self._run_task((func, args, kwargs, True, False))
+        tasks = [worker.run_task((func, args, kwargs, True, False))
                 for worker in self._workers]
         results = await asyncio.gather(*tasks, loop=self._loop)
-        return results
+        for success, result in results:
+            if not success:
+                raise result
+        return [result for _, result in results]
 
     async def _drain(self):
         """
