@@ -6,7 +6,6 @@ import argparse
 
 from . import util
 
-_logger = logging.Logger('distex.Server')
 
 
 class Server:
@@ -22,12 +21,13 @@ class Server:
         self._port = port
         self._loop = loop or asyncio.get_event_loop()
         self._server = None
+        self._logger = logging.getLogger('distex.Server')
         self._loop.run_until_complete(self.create())
 
     async def create(self):
         self._server = await asyncio.start_server(
                 self.handle_request, self._host, self._port, loop=self._loop)
-        _logger.info(f'Serving on port {self._port}')
+        self._logger.info(f'Serving on port {self._port}')
 
     async def handle_request(self, reader, writer):
         req_host, req_port = writer.get_extra_info('peername')
@@ -36,7 +36,7 @@ class Server:
         data = await reader.readline()
         nw, port, worker_loop = data.split()
         num_workers = int(nw) or os.cpu_count()
-        _logger.info(f'Starting up {num_workers} processors for {peername}')
+        self._logger.info(f'Starting up {num_workers} processors for {peername}')
 
         # start processors that will connect back to the remote server
         asyncio.gather(*[asyncio.create_subprocess_exec(
@@ -49,7 +49,7 @@ class Server:
 
     def stop(self):
         self._server.close()
-        _logger.info(f'Stopped serving from {self._port}')
+        self._logger.info(f'Stopped serving from {self._port}')
 
     def run(self):
         try:

@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>distex.pool &#8212; distex 0.5.4 documentation</title>
+    <title>distex.pool &#8212; distex 0.5.5 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.5.4',
+        VERSION:     '0.5.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -90,7 +90,6 @@
 <span class="kn">from</span> <span class="nn">.serializer</span> <span class="k">import</span> <span class="n">Serializer</span><span class="p">,</span> <span class="n">PickleType</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">util</span>
 
-<span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">(</span><span class="s1">&#39;distex.Pool&#39;</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Pool&#39;</span><span class="p">,</span> <span class="s1">&#39;RemoteException&#39;</span><span class="p">,</span> <span class="s1">&#39;HostSpec&#39;</span><span class="p">,</span> <span class="s1">&#39;PickleType&#39;</span><span class="p">,</span> <span class="s1">&#39;LoopType&#39;</span><span class="p">]</span>
 
@@ -151,47 +150,47 @@
 <div class="viewcode-block" id="Pool"><a class="viewcode-back" href="../../api.html#distex.pool.Pool">[docs]</a><span class="k">class</span> <span class="nc">Pool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    .. warning::</span>
-<span class="sd">    </span>
+
 <span class="sd">       Use a non-ssh process pool only in a trusted network environment.</span>
 <span class="sd">       Both the pool and the spawning server can in principle allow anyone</span>
 <span class="sd">       on the network to run arbitrary code.</span>
 
 <span class="sd">    Pool of local and remote workers that can run tasks.</span>
-<span class="sd">    </span>
-<span class="sd">    To create a process pool of 4 local workers: </span>
+
+<span class="sd">    To create a process pool of 4 local workers:</span>
 
 <span class="sd">    .. code-block:: python</span>
-<span class="sd">    </span>
+
 <span class="sd">        pool = Pool(4)</span>
-<span class="sd">    </span>
+
 <span class="sd">    To create 8 remote workers on host ``maxi``, using SSH (unix only):</span>
-<span class="sd">        </span>
+
 <span class="sd">    .. code-block:: python</span>
-<span class="sd">    </span>
+
 <span class="sd">        pool = Pool(0, [&#39;ssh://maxi/8&#39;])</span>
-<span class="sd">        </span>
+
 <span class="sd">    Note that distex must be installed on all remote hosts.</span>
 <span class="sd">    When using SSH it is not necessary to have a distex server running</span>
 <span class="sd">    on the hosts. When not using SSH a spawning server has to be started</span>
 <span class="sd">    first on all hosts involved:</span>
-<span class="sd">    </span>
+
 <span class="sd">    .. code-block:: python</span>
-<span class="sd">    </span>
+
 <span class="sd">        python3 -m distex.server</span>
-<span class="sd">    </span>
+
 <span class="sd">    With the server running on host ``mini``,</span>
 <span class="sd">    to create a pool of 2 workers running there:</span>
-<span class="sd">     </span>
+
 <span class="sd">    .. code-block:: python</span>
-<span class="sd">    </span>
+
 <span class="sd">        pool = Pool(0, [&#39;mini/2&#39;])</span>
-<span class="sd">    </span>
+
 <span class="sd">    Local, remote SSH and remote non-SSH workers can all be combined in one pool:</span>
-<span class="sd">     </span>
+
 <span class="sd">    .. code-block:: python</span>
-<span class="sd">    </span>
+
 <span class="sd">        pool = Pool(4, [&#39;ssh://maxi/8&#39;, &#39;mini/2&#39;])</span>
-<span class="sd">    </span>
+
 <span class="sd">    To give a SSH username or a non-default port such as 10022, specify the</span>
 <span class="sd">    host as ``&#39;ssh://username@maxi:10022/8&#39;``.</span>
 <span class="sd">    It is not possible to give a password,</span>
@@ -216,7 +215,7 @@
             <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters:</span>
-<span class="sd">        </span>
+
 <span class="sd">        * ``num_workers``: Number of local process workers. The default of</span>
 <span class="sd">          None will use the number of CPUs.</span>
 <span class="sd">        * ``hosts``: List of remote host specification strings in the format</span>
@@ -224,7 +223,7 @@
 <span class="sd">        * ``qsize``: Number of pending tasks per worker.</span>
 <span class="sd">          To improve the throughput of small tasks this can be increased</span>
 <span class="sd">          from the default of 2.</span>
-<span class="sd">          If no queueing is desired then it can be set to 1. </span>
+<span class="sd">          If no queueing is desired then it can be set to 1.</span>
 <span class="sd">        * ``initializer``: Callable to initialize worker processes.</span>
 <span class="sd">        * ``initargs``: Arguments tuple that is unpacked into the initializer.</span>
 <span class="sd">        * ``localhost``: Local TCP server (if any) will listen on this address.</span>
@@ -242,15 +241,15 @@
 <span class="sd">            ``PickleType`` to set the  respective pickle modules to use \</span>
 <span class="sd">            for serializing functions and for serializing data \</span>
 <span class="sd">            (data meaning task arguments and results).</span>
-<span class="sd">            </span>
+
 <span class="sd">            0. pickle</span>
 <span class="sd">            1. cloudpickle</span>
 <span class="sd">            2. dill</span>
 <span class="sd">        * ``loop``: The asyncio event loop to run the pool in.</span>
-<span class="sd">             </span>
+
 <span class="sd">        ``distex.Pool`` implements the concurrent.futures.Executor interface</span>
 <span class="sd">        and can be used in the place of ProcessPoolExecutor.</span>
-<span class="sd">        </span>
+
 <span class="sd">        .. _ssh-keygen: https://linux.die.net/man/1/ssh-keygen</span>
 <span class="sd">        .. _ssh-copy-id: https://linux.die.net/man/1/ssh-copy-id</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -281,6 +280,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span> <span class="o">=</span> <span class="n">SlotPool</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker_added</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ready</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;distex.Pool&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_called</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">lazy_create</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">is_running</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">())</span>
@@ -340,12 +340,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_unix_server</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">create_unix_server</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_create_worker</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_unix_path</span><span class="p">)</span>
-        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Started serving on Unix socket </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unix_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Started serving on Unix socket </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unix_path</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_start_tcp_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># start server that listens on a TCP port</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp_server</span><span class="p">:</span>
-            <span class="k">return</span>
         <span class="n">localhost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localhost</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;0.0.0.0&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hosts</span> <span class="k">else</span>
                 <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="p">:</span>
@@ -353,7 +351,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_tcp_server</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">create_server</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_create_worker</span><span class="p">,</span>
                 <span class="n">localhost</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="p">)</span>
-        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Started serving on port </span><span class="si">{self._localport}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Started serving on port </span><span class="si">{self._localport}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_add_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">:</span>
@@ -408,7 +406,7 @@
         <span class="n">worker</span> <span class="o">=</span> <span class="n">Worker</span><span class="p">(</span><span class="n">serializer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
         <span class="n">worker</span><span class="o">.</span><span class="n">disconnected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_disconnected</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">worker</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qsize</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">worker</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qsize</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker_added</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker_added</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">worker</span>
@@ -419,7 +417,7 @@
 <div class="viewcode-block" id="Pool.is_ready"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.is_ready">[docs]</a>    <span class="k">def</span> <span class="nf">is_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        True if the pool is ready to process tasks, false otherwise.</span>
-<span class="sd">        </span>
+
 <span class="sd">        There is also the public ``ready`` event.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ready</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span></div>
@@ -434,7 +432,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Submit the task to be run in the pool and return a</span>
 <span class="sd">        concurrent.futures.Future that will hold the result.</span>
-<span class="sd">        </span>
+
 <span class="sd">        This method is provided for compatibility with</span>
 <span class="sd">        concurrent.futures.Executor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -455,39 +453,39 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Map the function onto the given iterable(s) and</span>
 <span class="sd">        return an iterator that yields the results.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters:</span>
-<span class="sd">        </span>
+
 <span class="sd">        * ``func`` is a callable. If what the callable returns</span>
 <span class="sd">          is awaitable then it will be awaited and the result is returned.</span>
-<span class="sd">          </span>
+
 <span class="sd">        * ``iterables``: Sync or async iterables (in any combination)</span>
 <span class="sd">          that yield the arguments for ``func``. The iterables can</span>
 <span class="sd">          be unbounded (i.e. they don&#39;t need to have a length).</span>
-<span class="sd">        </span>
+
 <span class="sd">        * ``timeout``: Timeout in seconds since map is started.</span>
-<span class="sd">        </span>
+
 <span class="sd">        * ``chunksize``: Iterator will be chunked up to this size.</span>
 <span class="sd">          A larger chunksize can greatly improve efficiency for small tasks.</span>
-<span class="sd">        </span>
+
 <span class="sd">        * ``ordered``: If true then the order of results preserves the</span>
 <span class="sd">          order of the input iterables. If false then the results are</span>
 <span class="sd">          in order of completion. It is more efficient to use ordered=True.</span>
-<span class="sd">        </span>
+
 <span class="sd">        * ``star``: If true then there can be only one iterable and it must</span>
 <span class="sd">          yield sequences (such as tuples). The sequences will be</span>
 <span class="sd">          unpacked (&#39;starred&#39;) into ``func``.</span>
 <span class="sd">          If false then the values that the iterators yield will be supplied</span>
 <span class="sd">          in-place to ``func``.</span>
-<span class="sd">          </span>
+
 <span class="sd">        .. tip::</span>
-<span class="sd">        </span>
+
 <span class="sd">           The function ``func`` is is pickled only once and then cached.</span>
 <span class="sd">           If it takes arguments that remain constant during the mapping then</span>
 <span class="sd">           consider using ``functools.partial`` to bind the function with the</span>
 <span class="sd">           constant arguments; Then do the mapping with the bound function and</span>
 <span class="sd">           with lesser arguments. Especially when map uses large constant</span>
-<span class="sd">           datasets this can be beneficial. </span>
+<span class="sd">           datasets this can be beneficial.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">run</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span>
@@ -593,7 +591,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">success</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">worker</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">worker</span><span class="o">.</span><span class="n">tasks</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="ow">not</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">tasks</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">result</span>
         <span class="k">raise</span> <span class="n">result</span>
@@ -622,10 +620,10 @@
 <span class="sd">        Run the task on each worker in the pool. Return a list of all results</span>
 <span class="sd">        (in order of completion) or raise an exception in case the task fails</span>
 <span class="sd">        on one or more workers.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Will first wait for any other pending tasks to finish and then</span>
 <span class="sd">        schedule the task over all workers at the same time.</span>
-<span class="sd">        </span>
+
 <span class="sd">        This can be used for initializing, cleanup, intermittent polling, etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
@@ -641,10 +639,13 @@
 
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drain</span><span class="p">()</span>
 
-        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_task</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">worker</span><span class="o">.</span><span class="n">run_task</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="p">]</span>
         <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">results</span></div>
+        <span class="k">for</span> <span class="n">success</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">result</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span></div>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_drain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -685,7 +686,7 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2017, Ewald de Wit.
+      &copy;2018, Ewald de Wit.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>

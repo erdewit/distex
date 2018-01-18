@@ -9,7 +9,6 @@ from distex import util
 
 signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-_logger = logging.Logger('distex.Processor')
 
 
 class Processor(asyncio.Protocol):
@@ -27,6 +26,7 @@ class Processor(asyncio.Protocol):
         self._last_func = None
         self._serializer = Serializer()
         self._worker_task = loop.create_task(self.worker())
+        self._logger = logging.getLogger('distex.Processor')
         loop.run_until_complete(self.create())
 
     async def create(self):
@@ -71,12 +71,12 @@ class Processor(asyncio.Protocol):
             return f'{self._host}:{self._port}'
 
     def connection_made(self, _transport):
-        _logger.info(f'Connected to {self.peername()}')
+        self._logger.info(f'Connected to {self.peername()}')
 
     def connection_lost(self, exc):
         self._loop.stop()
         if exc:
-            _logger.error(f'Connection lost from {self.peername()}: {exc}')
+            self._logger.error(f'Connection lost from {self.peername()}: {exc}')
 
     def data_received(self, data):
         for task in self._serializer.get_requests(data):

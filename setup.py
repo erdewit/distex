@@ -10,9 +10,11 @@ here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+import distex
+
 setup(
     name='distex',
-    version='0.5.4',
+    version=distex.__version__,
     description='Async distributed process pool using asyncio',
     long_description=long_description,
     url='https://github.com/erdewit/distex',

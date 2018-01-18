@@ -14,7 +14,6 @@ from .slotpool import SlotPool
 from .serializer import Serializer, PickleType
 from . import util
 
-_logger = logging.Logger('distex.Pool')
 
 __all__ = ['Pool', 'RemoteException', 'HostSpec', 'PickleType', 'LoopType']
 
@@ -205,6 +204,7 @@ class Pool:
         self._slots = SlotPool(loop=self._loop)
         self._worker_added = asyncio.Event(loop=self._loop)
         self.ready = asyncio.Event(loop=self._loop)
+        self._logger = logging.getLogger('distex.Pool')
         self._create_called = False
         if not lazy_create and not self._loop.is_running():
             self._loop.run_until_complete(self.create())
@@ -264,7 +264,7 @@ class Pool:
         self._unix_server = await self._loop.create_unix_server(
                 self._create_worker,
                 self._unix_path)
-        _logger.info('Started serving on Unix socket %s', self._unix_path)
+        self._logger.info('Started serving on Unix socket %s', self._unix_path)
 
     async def _start_tcp_server(self):
         # start server that listens on a TCP port
@@ -275,7 +275,7 @@ class Pool:
         self._tcp_server = await self._loop.create_server(
                 self._create_worker,
                 localhost, self._localport)
-        _logger.info(f'Started serving on port {self._localport}')
+        self._logger.info(f'Started serving on port {self._localport}')
 
     async def _add_host(self, spec):
         if spec.is_ssh:
