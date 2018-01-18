@@ -23,8 +23,9 @@ class SlotPool:
         """
         if not slots:
             return
-        self.capacity += len(slots)
-        self.num_free += len(slots)
+        slots_length = len(slots)
+        self.capacity += slots_length
+        self.num_free += slots_length
         self._slots.appendleft(slots[0])
         self._slots.extend(slots[1:])
         self._wake_up_next()
