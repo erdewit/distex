@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>distex.pool &#8212; distex 0.5.5 documentation</title>
+    <title>distex.pool &#8212; distex 0.5.6 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.5.5',
+        VERSION:     '0.5.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -392,11 +392,10 @@
                 <span class="n">stdin</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                 <span class="n">stderr</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
         <span class="c1"># spawn processors that will connect to the tunneled Unix server</span>
-        <span class="n">cmd</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;python3 -m distex.processor &#39;</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{sys.executable}</span><span class="s1"> -m distex.processor &#39;</span>
                 <span class="n">f</span><span class="s1">&#39;-u </span><span class="si">{remote_unix_path}</span><span class="s1"> -l </span><span class="si">{self._worker_loop}</span><span class="s1"> &#39;</span>
-                <span class="s1">&#39;&amp; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_workers</span><span class="p">):</span>
-            <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+                <span class="s1">&#39;&amp; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span> <span class="o">*</span> <span class="n">num_workers</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
         <span class="k">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_tunnels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proc</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_total_workers</span> <span class="o">+=</span> <span class="n">num_workers</span>

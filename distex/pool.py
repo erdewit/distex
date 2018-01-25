@@ -316,11 +316,10 @@ class Pool:
                 stdin=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE)
         # spawn processors that will connect to the tunneled Unix server
-        cmd = ('python3 -m distex.processor '
+        cmd = (f'{sys.executable} -m distex.processor '
                 f'-u {remote_unix_path} -l {self._worker_loop} '
-                '& \n'.encode())
-        for _ in range(num_workers):
-            proc.stdin.write(cmd)
+                '& \n'.encode()) * num_workers
+        proc.stdin.write(cmd)
         await proc.stdin.drain()
         self._ssh_tunnels.append(proc)
         self._total_workers += num_workers
