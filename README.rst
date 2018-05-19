@@ -9,7 +9,7 @@ to efficiently manage the local and remote worker processes.
 
 Features:
 
-* Scales to 1000's of processors;
+* Scales from 1 to 1000's of processors;
 * Can handle in the order of 50.000 small tasks per second;
 * Easy to use with ssh (secure shell);
 * Full asynchronous support;
