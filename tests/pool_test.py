@@ -7,7 +7,7 @@ from distex import Pool, util
 
 loop = util.get_loop()
 asyncio.set_event_loop(loop)
-loop.set_debug(True)
+# loop.set_debug(True)
 
 
 def exception_handler(loop, context):
@@ -57,6 +57,7 @@ class PoolTest(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
 
             async def add(a, b):
+                import asyncio
                 await asyncio.sleep(0.001)
                 return a + b
 

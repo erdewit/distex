@@ -83,7 +83,7 @@ class Processor(asyncio.Protocol):
             self._queue.put_nowait(task)
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(
             description='Run a single task processor',
             formatter_class=argparse.RawTextHelpFormatter)
@@ -114,3 +114,7 @@ if __name__ == '__main__':
     asyncio.set_event_loop(loop)
     processor = Processor(args.host, args.port, args.unix_path, loop=loop)
     loop.run_forever()
+
+
+if __name__ == '__main__':
+    main()

@@ -289,7 +289,7 @@ class Pool:
         # spawn processors that will connect to our Unix or TCP server
         tasks = [self._loop.subprocess_exec(
                 asyncio.SubprocessProtocol,
-                sys.executable, '-m', 'distex.processor', *args,
+                'distex_proc', *args,
                 stdout=None, stderr=None)
                 for _ in range(self._num_workers)]
         self._procs = await asyncio.gather(*tasks, loop=self._loop)
@@ -316,8 +316,7 @@ class Pool:
                 stdin=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE)
         # spawn processors that will connect to the tunneled Unix server
-        cmd = (f'{sys.executable} -m distex.processor '
-                f'-u {remote_unix_path} -l {self._worker_loop} '
+        cmd = (f'distex_proc -u {remote_unix_path} -l {self._worker_loop} '
                 '& \n'.encode()) * num_workers
         proc.stdin.write(cmd)
         await proc.stdin.drain()

@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Distex documentation &#8212; distex 0.5.6 documentation</title>
+    <title>Distex documentation &#8212; distex 0.5.7 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.5.6',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -30,8 +22,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   <div class="document">
     
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -63,12 +54,14 @@
 
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -79,11 +72,75 @@
             
   <div class="section" id="distex-documentation">
 <span id="api"></span><h1>Distex documentation<a class="headerlink" href="#distex-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Release 0.5.6.</p>
+<p>Release 0.5.7.</p>
 <div class="toctree-wrapper compound">
 </div>
 <div class="section" id="module-distex.pool">
 <span id="pool"></span><h2>Pool<a class="headerlink" href="#module-distex.pool" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="distex.pool.RemoteException">
+<em class="property">exception </em><code class="descclassname">distex.pool.</code><code class="descname">RemoteException</code><span class="sig-paren">(</span><em>exc</em>, <em>tb=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#RemoteException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.RemoteException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Proxy for an exception that occurs remotely while running a task.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="distex.pool.HostSpec">
+<em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">HostSpec</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#HostSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.HostSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remote host specification.</p>
+<p>Parse the host url string.</p>
+<dl class="attribute">
+<dt id="distex.pool.HostSpec.num_workers">
+<code class="descname">num_workers</code><a class="headerlink" href="#distex.pool.HostSpec.num_workers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="distex.pool.HostSpec.host">
+<code class="descname">host</code><a class="headerlink" href="#distex.pool.HostSpec.host" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="distex.pool.HostSpec.port">
+<code class="descname">port</code><a class="headerlink" href="#distex.pool.HostSpec.port" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="distex.pool.HostSpec.is_ssh">
+<code class="descname">is_ssh</code><a class="headerlink" href="#distex.pool.HostSpec.is_ssh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="distex.pool.LoopType">
+<em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">LoopType</code><a class="reference internal" href="_modules/distex/pool.html#LoopType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.LoopType" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+<dl class="attribute">
+<dt id="distex.pool.LoopType.default">
+<code class="descname">default</code><em class="property"> = 0</em><a class="headerlink" href="#distex.pool.LoopType.default" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="distex.pool.LoopType.asyncio">
+<code class="descname">asyncio</code><em class="property"> = 1</em><a class="headerlink" href="#distex.pool.LoopType.asyncio" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="distex.pool.LoopType.uvloop">
+<code class="descname">uvloop</code><em class="property"> = 2</em><a class="headerlink" href="#distex.pool.LoopType.uvloop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="distex.pool.LoopType.proactor">
+<code class="descname">proactor</code><em class="property"> = 3</em><a class="headerlink" href="#distex.pool.LoopType.proactor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="distex.pool.LoopType.quamash">
+<code class="descname">quamash</code><em class="property"> = 4</em><a class="headerlink" href="#distex.pool.LoopType.quamash" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="class">
 <dt id="distex.pool.Pool">
 <em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">Pool</code><span class="sig-paren">(</span><em>num_workers: int = None</em>, <em>hosts=None</em>, <em>qsize: int = 2</em>, <em>initializer=None</em>, <em>initargs: tuple = ()</em>, <em>localhost: str = None</em>, <em>localport: int = None</em>, <em>lazy_create: bool = False</em>, <em>worker_loop=&lt;LoopType.default: 0&gt;</em>, <em>func_pickle=&lt;PickleType.dill: 2&gt;</em>, <em>data_pickle=&lt;PickleType.pickle: 0&gt;</em>, <em>loop=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool" title="Permalink to this definition">¶</a></dt>
@@ -95,53 +152,53 @@ on the network to run arbitrary code.</p>
 </div>
 <p>Pool of local and remote workers that can run tasks.</p>
 <p>To create a process pool of 4 local workers:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To create 8 remote workers on host <code class="docutils literal"><span class="pre">maxi</span></code>, using SSH (unix only):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ssh://maxi/8&#39;</span><span class="p">])</span>
+<p>To create 8 remote workers on host <code class="docutils literal notranslate"><span class="pre">maxi</span></code>, using SSH (unix only):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ssh://maxi/8&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Note that distex must be installed on all remote hosts.
 When using SSH it is not necessary to have a distex server running
 on the hosts. When not using SSH a spawning server has to be started
 first on all hosts involved:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">distex</span><span class="o">.</span><span class="n">server</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">distex</span><span class="o">.</span><span class="n">server</span>
 </pre></div>
 </div>
-<p>With the server running on host <code class="docutils literal"><span class="pre">mini</span></code>,
+<p>With the server running on host <code class="docutils literal notranslate"><span class="pre">mini</span></code>,
 to create a pool of 2 workers running there:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;mini/2&#39;</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;mini/2&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Local, remote SSH and remote non-SSH workers can all be combined in one pool:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ssh://maxi/8&#39;</span><span class="p">,</span> <span class="s1">&#39;mini/2&#39;</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ssh://maxi/8&#39;</span><span class="p">,</span> <span class="s1">&#39;mini/2&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>To give a SSH username or a non-default port such as 10022, specify the
-host as <code class="docutils literal"><span class="pre">'ssh://username&#64;maxi:10022/8'</span></code>.
+host as <code class="docutils literal notranslate"><span class="pre">'ssh://username&#64;maxi:10022/8'</span></code>.
 It is not possible to give a password,
 use SSH keys instead: <a class="reference external" href="https://linux.die.net/man/1/ssh-keygen">ssh-keygen</a> can be used to create a key and
 <a class="reference external" href="https://linux.die.net/man/1/ssh-copy-id">ssh-copy-id</a> to copy it to all hosts.</p>
 <p>Parameters:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">num_workers</span></code>: Number of local process workers. The default of
+<li><code class="docutils literal notranslate"><span class="pre">num_workers</span></code>: Number of local process workers. The default of
 None will use the number of CPUs.</li>
-<li><code class="docutils literal"><span class="pre">hosts</span></code>: List of remote host specification strings in the format
-<code class="docutils literal"><span class="pre">[ssh://][username&#64;]hostname[:portnumber]/num_workers</span></code>.</li>
-<li><code class="docutils literal"><span class="pre">qsize</span></code>: Number of pending tasks per worker.
+<li><code class="docutils literal notranslate"><span class="pre">hosts</span></code>: List of remote host specification strings in the format
+<code class="docutils literal notranslate"><span class="pre">[ssh://][username&#64;]hostname[:portnumber]/num_workers</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">qsize</span></code>: Number of pending tasks per worker.
 To improve the throughput of small tasks this can be increased
 from the default of 2.
 If no queueing is desired then it can be set to 1.</li>
-<li><code class="docutils literal"><span class="pre">initializer</span></code>: Callable to initialize worker processes.</li>
-<li><code class="docutils literal"><span class="pre">initargs</span></code>: Arguments tuple that is unpacked into the initializer.</li>
-<li><code class="docutils literal"><span class="pre">localhost</span></code>: Local TCP server (if any) will listen on this address.</li>
-<li><code class="docutils literal"><span class="pre">localport</span></code>: Local TCP server (if any) will listen on this port
+<li><code class="docutils literal notranslate"><span class="pre">initializer</span></code>: Callable to initialize worker processes.</li>
+<li><code class="docutils literal notranslate"><span class="pre">initargs</span></code>: Arguments tuple that is unpacked into the initializer.</li>
+<li><code class="docutils literal notranslate"><span class="pre">localhost</span></code>: Local TCP server (if any) will listen on this address.</li>
+<li><code class="docutils literal notranslate"><span class="pre">localport</span></code>: Local TCP server (if any) will listen on this port
 (default: random open port).</li>
-<li><code class="docutils literal"><span class="pre">lazy_create</span></code>: If True then no workers will be created until the
+<li><code class="docutils literal notranslate"><span class="pre">lazy_create</span></code>: If True then no workers will be created until the
 first task is submitted.</li>
 <li><dl class="first docutils">
-<dt><code class="docutils literal"><span class="pre">worker_loop</span></code>: <code class="docutils literal"><span class="pre">LoopType</span></code> to use for workers.</dt>
+<dt><code class="docutils literal notranslate"><span class="pre">worker_loop</span></code>: <code class="docutils literal notranslate"><span class="pre">LoopType</span></code> to use for workers.</dt>
 <dd><ol class="first last arabic" start="0">
 <li>default (=uvloop when available, proactor on Windows)</li>
 <li>asyncio (standard selector event loop)</li>
@@ -153,8 +210,8 @@ first task is submitted.</li>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><code class="docutils literal"><span class="pre">func_pickle</span></code> and <code class="docutils literal"><span class="pre">data_pickle</span></code>:</dt>
-<dd><code class="docutils literal"><span class="pre">PickleType</span></code> to set the  respective pickle modules to use             for serializing functions and for serializing data             (data meaning task arguments and results).<ol class="last arabic" start="0">
+<dt><code class="docutils literal notranslate"><span class="pre">func_pickle</span></code> and <code class="docutils literal notranslate"><span class="pre">data_pickle</span></code>:</dt>
+<dd><code class="docutils literal notranslate"><span class="pre">PickleType</span></code> to set the  respective pickle modules to use             for serializing functions and for serializing data             (data meaning task arguments and results).<ol class="last arabic" start="0">
 <li>pickle</li>
 <li>cloudpickle</li>
 <li>dill</li>
@@ -162,14 +219,71 @@ first task is submitted.</li>
 </dd>
 </dl>
 </li>
-<li><code class="docutils literal"><span class="pre">loop</span></code>: The asyncio event loop to run the pool in.</li>
+<li><code class="docutils literal notranslate"><span class="pre">loop</span></code>: The asyncio event loop to run the pool in.</li>
 </ul>
-<p><code class="docutils literal"><span class="pre">distex.Pool</span></code> implements the concurrent.futures.Executor interface
+<p><code class="docutils literal notranslate"><span class="pre">distex.Pool</span></code> implements the concurrent.futures.Executor interface
 and can be used in the place of ProcessPoolExecutor.</p>
 <dl class="exception">
 <dt id="distex.pool.Pool.TimeoutError">
 <em class="property">exception </em><code class="descname">TimeoutError</code><a class="headerlink" href="#distex.pool.Pool.TimeoutError" title="Permalink to this definition">¶</a></dt>
 <dd><p>The operation exceeded the given deadline.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="distex.pool.Pool.is_ready">
+<code class="descname">is_ready</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/distex/pool.html#Pool.is_ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.is_ready" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the pool is ready to process tasks, false otherwise.</p>
+<p>There is also the public <code class="docutils literal notranslate"><span class="pre">ready</span></code> event.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="distex.pool.Pool.total_workers">
+<code class="descname">total_workers</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/distex/pool.html#Pool.total_workers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.total_workers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total numer of workers in the pool.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="distex.pool.Pool.submit">
+<code class="descname">submit</code><span class="sig-paren">(</span><em>func</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.submit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submit the task to be run in the pool and return a
+concurrent.futures.Future that will hold the result.</p>
+<p>This method is provided for compatibility with
+concurrent.futures.Executor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="distex.pool.Pool.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>func</em>, <em>*iterables</em>, <em>timeout=None</em>, <em>chunksize=1</em>, <em>ordered=True</em>, <em>star=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map the function onto the given iterable(s) and
+return an iterator that yields the results.</p>
+<p>Parameters:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">func</span></code> is a callable. If what the callable returns
+is awaitable then it will be awaited and the result is returned.</li>
+<li><code class="docutils literal notranslate"><span class="pre">iterables</span></code>: Sync or async iterables (in any combination)
+that yield the arguments for <code class="docutils literal notranslate"><span class="pre">func</span></code>. The iterables can
+be unbounded (i.e. they don’t need to have a length).</li>
+<li><code class="docutils literal notranslate"><span class="pre">timeout</span></code>: Timeout in seconds since map is started.</li>
+<li><code class="docutils literal notranslate"><span class="pre">chunksize</span></code>: Iterator will be chunked up to this size.
+A larger chunksize can greatly improve efficiency for small tasks.</li>
+<li><code class="docutils literal notranslate"><span class="pre">ordered</span></code>: If true then the order of results preserves the
+order of the input iterables. If false then the results are
+in order of completion. It is more efficient to use ordered=True.</li>
+<li><code class="docutils literal notranslate"><span class="pre">star</span></code>: If true then there can be only one iterable and it must
+yield sequences (such as tuples). The sequences will be
+unpacked (‘starred’) into <code class="docutils literal notranslate"><span class="pre">func</span></code>.
+If false then the values that the iterators yield will be supplied
+in-place to <code class="docutils literal notranslate"><span class="pre">func</span></code>.</li>
+</ul>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">The function <code class="docutils literal notranslate"><span class="pre">func</span></code> is is pickled only once and then cached.
+If it takes arguments that remain constant during the mapping then
+consider using <code class="docutils literal notranslate"><span class="pre">functools.partial</span></code> to bind the function with the
+constant arguments; Then do the mapping with the bound function and
+with lesser arguments. Especially when map uses large constant
+datasets this can be beneficial.</p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -180,59 +294,10 @@ start up remote processors.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="distex.pool.Pool.is_ready">
-<code class="descname">is_ready</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/distex/pool.html#Pool.is_ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.is_ready" title="Permalink to this definition">¶</a></dt>
-<dd><p>True if the pool is ready to process tasks, false otherwise.</p>
-<p>There is also the public <code class="docutils literal"><span class="pre">ready</span></code> event.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.map">
-<code class="descname">map</code><span class="sig-paren">(</span><em>func</em>, <em>*iterables</em>, <em>timeout=None</em>, <em>chunksize=1</em>, <em>ordered=True</em>, <em>star=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.map" title="Permalink to this definition">¶</a></dt>
-<dd><p>Map the function onto the given iterable(s) and
-return an iterator that yields the results.</p>
-<p>Parameters:</p>
-<ul class="simple">
-<li><code class="docutils literal"><span class="pre">func</span></code> is a callable. If what the callable returns
-is awaitable then it will be awaited and the result is returned.</li>
-<li><code class="docutils literal"><span class="pre">iterables</span></code>: Sync or async iterables (in any combination)
-that yield the arguments for <code class="docutils literal"><span class="pre">func</span></code>. The iterables can
-be unbounded (i.e. they don’t need to have a length).</li>
-<li><code class="docutils literal"><span class="pre">timeout</span></code>: Timeout in seconds since map is started.</li>
-<li><code class="docutils literal"><span class="pre">chunksize</span></code>: Iterator will be chunked up to this size.
-A larger chunksize can greatly improve efficiency for small tasks.</li>
-<li><code class="docutils literal"><span class="pre">ordered</span></code>: If true then the order of results preserves the
-order of the input iterables. If false then the results are
-in order of completion. It is more efficient to use ordered=True.</li>
-<li><code class="docutils literal"><span class="pre">star</span></code>: If true then there can be only one iterable and it must
-yield sequences (such as tuples). The sequences will be
-unpacked (‘starred’) into <code class="docutils literal"><span class="pre">func</span></code>.
-If false then the values that the iterators yield will be supplied
-in-place to <code class="docutils literal"><span class="pre">func</span></code>.</li>
-</ul>
-<div class="admonition tip">
-<p class="first admonition-title">Tip</p>
-<p class="last">The function <code class="docutils literal"><span class="pre">func</span></code> is is pickled only once and then cached.
-If it takes arguments that remain constant during the mapping then
-consider using <code class="docutils literal"><span class="pre">functools.partial</span></code> to bind the function with the
-constant arguments; Then do the mapping with the bound function and
-with lesser arguments. Especially when map uses large constant
-datasets this can be beneficial.</p>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="distex.pool.Pool.map_async">
 <code class="descname">map_async</code><span class="sig-paren">(</span><em>func</em>, <em>*iterables</em>, <em>timeout=None</em>, <em>chunksize=1</em>, <em>ordered=True</em>, <em>star=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.map_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.map_async" title="Permalink to this definition">¶</a></dt>
-<dd><p>Async version of <code class="docutils literal"><span class="pre">map</span></code>. This runs with less overhead than <code class="docutils literal"><span class="pre">map</span></code>
+<dd><p>Async version of <code class="docutils literal notranslate"><span class="pre">map</span></code>. This runs with less overhead than <code class="docutils literal notranslate"><span class="pre">map</span></code>
 and can be twice as fast for small tasks.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>func</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run the function with the given arguments
-in the pool and wait for the result.</p>
 </dd></dl>
 
 <dl class="method">
@@ -240,6 +305,24 @@ in the pool and wait for the result.</p>
 <code class="descname">run_async</code><span class="sig-paren">(</span><em>func</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.run_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.run_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Asynchronlously run the function with the given arguments
 in the pool and return the result when it becomes available.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="distex.pool.Pool.run_on_all_async">
+<code class="descname">run_on_all_async</code><span class="sig-paren">(</span><em>func</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.run_on_all_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.run_on_all_async" title="Permalink to this definition">¶</a></dt>
+<dd><p>Async version of <code class="docutils literal notranslate"><span class="pre">run_on_all</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="distex.pool.Pool.shutdown_async">
+<code class="descname">shutdown_async</code><span class="sig-paren">(</span><em>wait=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.shutdown_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.shutdown_async" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="distex.pool.Pool.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>func</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the function with the given arguments
+in the pool and wait for the result.</p>
 </dd></dl>
 
 <dl class="method">
@@ -254,69 +337,10 @@ schedule the task over all workers at the same time.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="distex.pool.Pool.run_on_all_async">
-<code class="descname">run_on_all_async</code><span class="sig-paren">(</span><em>func</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.run_on_all_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.run_on_all_async" title="Permalink to this definition">¶</a></dt>
-<dd><p>Async version of <code class="docutils literal"><span class="pre">run_on_all</span></code>.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="distex.pool.Pool.shutdown">
 <code class="descname">shutdown</code><span class="sig-paren">(</span><em>wait=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.shutdown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shutdown the pool and clean up resources.</p>
 </dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.shutdown_async">
-<code class="descname">shutdown_async</code><span class="sig-paren">(</span><em>wait=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.shutdown_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.shutdown_async" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.submit">
-<code class="descname">submit</code><span class="sig-paren">(</span><em>func</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.submit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Submit the task to be run in the pool and return a
-concurrent.futures.Future that will hold the result.</p>
-<p>This method is provided for compatibility with
-concurrent.futures.Executor.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.total_workers">
-<code class="descname">total_workers</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/distex/pool.html#Pool.total_workers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.total_workers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Total numer of workers in the pool.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="exception">
-<dt id="distex.pool.RemoteException">
-<em class="property">exception </em><code class="descclassname">distex.pool.</code><code class="descname">RemoteException</code><span class="sig-paren">(</span><em>exc</em>, <em>tb=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#RemoteException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.RemoteException" title="Permalink to this definition">¶</a></dt>
-<dd><p>Proxy for an exception that occurs remotely while running a task.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="distex.pool.HostSpec">
-<em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">HostSpec</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#HostSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.HostSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remote host specification.</p>
-<p>Parse the host url string.</p>
-<dl class="attribute">
-<dt id="distex.pool.HostSpec.host">
-<code class="descname">host</code><a class="headerlink" href="#distex.pool.HostSpec.host" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="distex.pool.HostSpec.is_ssh">
-<code class="descname">is_ssh</code><a class="headerlink" href="#distex.pool.HostSpec.is_ssh" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="distex.pool.HostSpec.num_workers">
-<code class="descname">num_workers</code><a class="headerlink" href="#distex.pool.HostSpec.num_workers" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="distex.pool.HostSpec.port">
-<code class="descname">port</code><a class="headerlink" href="#distex.pool.HostSpec.port" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -325,6 +349,11 @@ concurrent.futures.Executor.</p>
 <em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">PickleType</code><a class="reference internal" href="_modules/distex/serializer.html#PickleType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.PickleType" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enumeration.</p>
 <dl class="attribute">
+<dt id="distex.pool.PickleType.pickle">
+<code class="descname">pickle</code><em class="property"> = 0</em><a class="headerlink" href="#distex.pool.PickleType.pickle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="distex.pool.PickleType.cloudpickle">
 <code class="descname">cloudpickle</code><em class="property"> = 1</em><a class="headerlink" href="#distex.pool.PickleType.cloudpickle" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -332,42 +361,6 @@ concurrent.futures.Executor.</p>
 <dl class="attribute">
 <dt id="distex.pool.PickleType.dill">
 <code class="descname">dill</code><em class="property"> = 2</em><a class="headerlink" href="#distex.pool.PickleType.dill" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="distex.pool.PickleType.pickle">
-<code class="descname">pickle</code><em class="property"> = 0</em><a class="headerlink" href="#distex.pool.PickleType.pickle" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="distex.pool.LoopType">
-<em class="property">class </em><code class="descclassname">distex.pool.</code><code class="descname">LoopType</code><a class="reference internal" href="_modules/distex/pool.html#LoopType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.LoopType" title="Permalink to this definition">¶</a></dt>
-<dd><p>An enumeration.</p>
-<dl class="attribute">
-<dt id="distex.pool.LoopType.asyncio">
-<code class="descname">asyncio</code><em class="property"> = 1</em><a class="headerlink" href="#distex.pool.LoopType.asyncio" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="distex.pool.LoopType.default">
-<code class="descname">default</code><em class="property"> = 0</em><a class="headerlink" href="#distex.pool.LoopType.default" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="distex.pool.LoopType.proactor">
-<code class="descname">proactor</code><em class="property"> = 3</em><a class="headerlink" href="#distex.pool.LoopType.proactor" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="distex.pool.LoopType.quamash">
-<code class="descname">quamash</code><em class="property"> = 4</em><a class="headerlink" href="#distex.pool.LoopType.quamash" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="distex.pool.LoopType.uvloop">
-<code class="descname">uvloop</code><em class="property"> = 2</em><a class="headerlink" href="#distex.pool.LoopType.uvloop" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -385,8 +378,8 @@ concurrent.futures.Executor.</p>
       &copy;2018, Ewald de Wit.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
       <a href="_sources/api.rst.txt"

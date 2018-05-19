@@ -40,7 +40,7 @@ class Server:
 
         # start processors that will connect back to the remote server
         asyncio.gather(*[asyncio.create_subprocess_exec(
-                sys.executable, '-m', 'distex.processor',
+                'distex_proc',
                 '-H', req_host, '-p', port, '-l', worker_loop,
                 stdout=None, stderr=None, loop=self._loop)
                 for _ in range(num_workers)])

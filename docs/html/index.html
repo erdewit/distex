@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Introduction &#8212; distex 0.5.6 documentation</title>
+    <title>Introduction &#8212; distex 0.5.7 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.5.6',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -30,8 +22,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   <div class="document">
     
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -60,12 +51,14 @@
 
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -95,19 +88,19 @@ to efficiently manage the local and remote worker processes.</p>
 <li>Easy to use with ssh (secure shell);</li>
 <li>Full asynchronous support;</li>
 <li>Maps over unbounded iterables;</li>
-<li>Choice of <code class="docutils literal"><span class="pre">pickle</span></code>, <code class="docutils literal"><span class="pre">dill</span></code> or <code class="docutils literal"><span class="pre">cloudpickle</span></code> serialization for
+<li>Choice of <code class="docutils literal notranslate"><span class="pre">pickle</span></code>, <code class="docutils literal notranslate"><span class="pre">dill</span></code> or <code class="docutils literal notranslate"><span class="pre">cloudpickle</span></code> serialization for
 functions and data;</li>
-<li>Backward compatible with <code class="docutils literal"><span class="pre">concurrent.futures.ProcessPool</span></code> (<a class="reference external" href="https://www.python.org/dev/peps/pep-3148">PEP3148</a>).</li>
+<li>Backward compatible with <code class="docutils literal notranslate"><span class="pre">concurrent.futures.ProcessPool</span></code> (<a class="reference external" href="https://www.python.org/dev/peps/pep-3148">PEP3148</a>).</li>
 </ul>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">distex</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">distex</span>
 </pre></div>
 </div>
 <p>Dependencies:</p>
 <ul class="simple">
 <li><a class="reference external" href="http://www.python.org">Python</a> version 3.6 or higher;</li>
-<li>On Unix the <code class="docutils literal"><span class="pre">uvloop</span></code> package is recommended: <code class="docutils literal"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">uvloop</span></code></li>
+<li>On Unix the <code class="docutils literal notranslate"><span class="pre">uvloop</span></code> package is recommended: <code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">uvloop</span></code></li>
 <li>SSH client and server (optional).</li>
 </ul>
 </div>
@@ -115,7 +108,7 @@ functions and data;</li>
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>A process pool can have local and remote workers in any combination.
 Here is a pool that uses 4 local workers:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">distex</span> <span class="kn">import</span> <span class="n">Pool</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">distex</span> <span class="kn">import</span> <span class="n">Pool</span>
 
 <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span>
@@ -125,12 +118,12 @@ Here is a pool that uses 4 local workers:</p>
     <span class="k">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To create a pool that also uses 8 workers on host <code class="docutils literal"><span class="pre">maxi</span></code>, using ssh:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ssh://maxi/8&#39;</span><span class="p">])</span>
+<p>To create a pool that also uses 8 workers on host <code class="docutils literal notranslate"><span class="pre">maxi</span></code>, using ssh:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ssh://maxi/8&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>There is full support for every asynchronous construct imaginable:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">from</span> <span class="nn">distex</span> <span class="kn">import</span> <span class="n">Pool</span>
 
 <span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
@@ -183,6 +176,12 @@ share the same ssh tunnel.</p>
 </div>
 <div class="section" id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="version-0-5-7">
+<h3>Version 0.5.7<a class="headerlink" href="#version-0-5-7" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>distex_proc entry point is now used to allow various Python setups</li>
+</ul>
+</div>
 <div class="section" id="version-0-5-6">
 <h3>Version 0.5.6<a class="headerlink" href="#version-0-5-6" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
@@ -247,8 +246,8 @@ share the same ssh tunnel.</p>
       &copy;2018, Ewald de Wit.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
       <a href="_sources/index.rst.txt"

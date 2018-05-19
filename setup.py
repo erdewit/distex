@@ -32,5 +32,10 @@ setup(
     ],
     keywords='python asyncio parallel distributed computing process pool task queue',
     packages=['distex'],
+    entry_points={
+        'console_scripts': [
+            'distex_proc=distex.processor:main'
+        ]
+    },
     install_requires=['dill', 'cloudpickle'],
 )
