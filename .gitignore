@@ -106,3 +106,4 @@ docs/doctrees/
 .settings/
 tests/test.py
 docs/html/.buildinfo
+.idea
