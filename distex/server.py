@@ -32,7 +32,7 @@ class Server:
     async def handle_request(self, reader, writer):
         req_host, req_port = writer.get_extra_info('peername')
         peername = f'{req_host}:{req_port}'
-        _logger.info(f'Connection from {peername}')
+        self._logger.info(f'Connection from {peername}')
         data = await reader.readline()
         nw, port, worker_loop = data.split()
         num_workers = int(nw) or os.cpu_count()
