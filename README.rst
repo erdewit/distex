@@ -116,6 +116,10 @@ Documentation
 Changelog
 ---------
 
+Version 0.5.8
+^^^^^^^^^^^^^
+* PR #9 merged to fix server script
+
 Version 0.5.7
 ^^^^^^^^^^^^^
 * distex_proc entry point is now used to allow various Python setups
