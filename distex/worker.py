@@ -41,8 +41,9 @@ class Worker:
         """
         Close connection to the processor.
         """
-        self.transport.close()
-        self.transport = None
+        if self.transport:
+            self.transport.close()
+            self.transport = None
 
     # protocol callbacks:
 

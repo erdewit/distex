@@ -582,7 +582,11 @@ class Pool:
         """
         Shutdown the pool and clean up resources.
         """
-        self._loop.run_until_complete(self.shutdown_async(wait))
+        coro = self.shutdown_async(wait)
+        if self._loop.is_running():
+            asyncio.ensure_future(coro)
+        else:
+            self._loop.run_until_complete(self.shutdown_async(wait))
 
     async def shutdown_async(self, wait=True):
         if not self._total_workers:

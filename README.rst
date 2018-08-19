@@ -116,6 +116,10 @@ Documentation
 Changelog
 ---------
 
+Version 0.5.9
+^^^^^^^^^^^^^
+* Make pool.shutdown() possible when event loop is already running
+
 Version 0.5.8
 ^^^^^^^^^^^^^
 * PR #9 merged to fix server script
