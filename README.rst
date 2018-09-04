@@ -65,11 +65,13 @@ There is full support for every asynchronous construct imaginable:
     def init():
         # pool initializer: set the start time for every worker
         import time
-        __builtins__.t0 = time.time()
+        import builtins
+        builtins.t0 = time.time()
     
     async def timer(i=0):
         # async code running in the pool
         import time
+        import asyncio
         await asyncio.sleep(1)
         return time.time() - t0
     
