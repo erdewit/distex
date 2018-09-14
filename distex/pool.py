@@ -18,51 +18,6 @@ from . import util
 __all__ = ['Pool', 'RemoteException', 'HostSpec', 'PickleType', 'LoopType']
 
 
-class RemoteException(Exception):
-    """
-    Proxy for an exception that occurs remotely while running a task.
-    """
-
-    def __init__(self, exc, tb=None):
-        self.exc = exc
-        tb = tb or traceback.format_exception(
-                type(exc), exc, exc.__traceback__)
-        self.tb = ''.join(tb)
-
-    def __str__(self):
-        return self.tb
-
-    def __reduce__(self):
-        return RemoteException._unpickle, (self.exc, self.tb)
-
-    @staticmethod
-    def _unpickle(exc, tb):
-        exc.__cause__ = RemoteException(None, tb)
-        return exc
-
-
-class HostSpec:
-    """
-    Remote host specification.
-    """
-    __slots__ = ('num_workers', 'is_ssh', 'host', 'port')
-
-    def __init__(self, url):
-        """
-        Parse the host url string.
-        """
-        front, ssh, back, = url.partition('ssh://')
-        h_p, *nw = (back if ssh else front).split('/')
-        if not h_p:
-            raise ValueError(f'Bad server specification: {url}')
-        if not nw:
-            raise ValueError(f'Specify num_workers for {url}')
-        self.num_workers = int(nw[0])
-        self.host, *port = h_p.split(':')
-        self.port = port[0] if port else '' if ssh else str(util.DEFAULT_PORT)
-        self.is_ssh = bool(ssh)
-
-
 class LoopType(IntEnum):
     default = 0
     asyncio = 1
@@ -193,7 +148,14 @@ class Pool:
             raise ValueError('num_workers must be >= 0')
         if self._qsize < 1:
             raise ValueError('qsize must be >= 1')
+        self.ready = asyncio.Event(loop=self._loop)
+        self._worker_added = asyncio.Event(loop=self._loop)
+        self._logger = logging.getLogger('distex.Pool')
+        self._reset()
+        if not lazy_create and not self._loop.is_running():
+            self._loop.run_until_complete(self.create())
 
+    def _reset(self):
         self._tcp_server = None
         self._unix_server = None
         self._unix_path = ''
@@ -202,12 +164,7 @@ class Pool:
         self._total_workers = 0
         self._workers = []
         self._slots = SlotPool(loop=self._loop)
-        self._worker_added = asyncio.Event(loop=self._loop)
-        self.ready = asyncio.Event(loop=self._loop)
-        self._logger = logging.getLogger('distex.Pool')
         self._create_called = False
-        if not lazy_create and not self._loop.is_running():
-            self._loop.run_until_complete(self.create())
 
     def __enter__(self):
         return self
@@ -254,9 +211,12 @@ class Pool:
             await self._worker_added.wait()
 
         await asyncio.sleep(0, loop=self._loop)  # needed for lazy_create
-        self.ready.set()
         if self._initializer:
-            await self.run_on_all_async(self._initializer, *self._initargs)
+            tasks = [worker.run_task(
+                    (self._initializer, self._initargs, {}, True, False))
+                    for worker in self._workers]
+            await asyncio.gather(*tasks, loop=self._loop)
+        self.ready.set()
 
     async def _start_unix_server(self):
         # start server that listens on a Unix socket
@@ -603,4 +563,49 @@ class Pool:
                 os.unlink(self._unix_path)
         if self._tcp_server:
             self._tcp_server.close()
-        self._workers = None
+        self._reset()
+
+
+class RemoteException(Exception):
+    """
+    Proxy for an exception that occurs remotely while running a task.
+    """
+
+    def __init__(self, exc, tb=None):
+        self.exc = exc
+        tb = tb or traceback.format_exception(
+                type(exc), exc, exc.__traceback__)
+        self.tb = ''.join(tb)
+
+    def __str__(self):
+        return self.tb
+
+    def __reduce__(self):
+        return RemoteException._unpickle, (self.exc, self.tb)
+
+    @staticmethod
+    def _unpickle(exc, tb):
+        exc.__cause__ = RemoteException(None, tb)
+        return exc
+
+
+class HostSpec:
+    """
+    Remote host specification.
+    """
+    __slots__ = ('num_workers', 'is_ssh', 'host', 'port')
+
+    def __init__(self, url):
+        """
+        Parse the host url string.
+        """
+        front, ssh, back, = url.partition('ssh://')
+        h_p, *nw = (back if ssh else front).split('/')
+        if not h_p:
+            raise ValueError(f'Bad server specification: {url}')
+        if not nw:
+            raise ValueError(f'Specify num_workers for {url}')
+        self.num_workers = int(nw[0])
+        self.host, *port = h_p.split(':')
+        self.port = port[0] if port else '' if ssh else str(util.DEFAULT_PORT)
+        self.is_ssh = bool(ssh)
