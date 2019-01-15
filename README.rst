@@ -17,7 +17,7 @@ Features:
 * Choice of ``pickle``, ``dill`` or ``cloudpickle`` serialization for
   functions and data;
 * Backward compatible with ``concurrent.futures.ProcessPool`` (PEP3148_).
- 
+
 
 Installation
 ------------
@@ -30,7 +30,7 @@ Dependencies:
 
 * Python_ version 3.6 or higher;
 * On Unix the ``uvloop`` package is recommended: ``pip3 install uvloop``
-* SSH client and server (optional). 
+* SSH client and server (optional).
 
 Examples
 --------
@@ -48,7 +48,7 @@ Here is a pool that uses 4 local workers:
     pool = Pool(4)
     for y in pool.map(f, range(100)):
         print(y)
-        
+
 To create a pool that also uses 8 workers on host ``maxi``, using ssh:
 
 .. code-block:: python
@@ -67,27 +67,27 @@ There is full support for every asynchronous construct imaginable:
         import time
         import builtins
         builtins.t0 = time.time()
-    
+
     async def timer(i=0):
         # async code running in the pool
         import time
         import asyncio
         await asyncio.sleep(1)
         return time.time() - t0
-    
+
     async def ait():
         # async iterator running on the user side
         for i in range(20):
             await asyncio.sleep(0.1)
             yield i
-    
+
     async def main():
         async with Pool(4, initializer=init, qsize=1) as pool:
             async for t in pool.map_async(timer, ait()):
                 print(t)
             print(await pool.run_on_all_async(timer))
-    
-    
+
+
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
 
@@ -108,7 +108,7 @@ When using ssh, a remote (or 'reverse') tunnel is created from a remote Unix soc
 to the local Unix socket that the local server is listening on.
 Multiple workers on a remote machine will use the same Unix socket and
 share the same ssh tunnel.
-    
+
 Documentation
 -------------
 
@@ -193,7 +193,7 @@ Version 0.5.0
 
 .. |License| image:: https://img.shields.io/badge/license-BSD-blue.svg
    :alt:
-   
-.. |Docs| image:: https://readthedocs.org/projects/distex/badge/?version=latest
-   :alt: Documentation Status
+
+.. |Docs| image:: https://img.shields.io/badge/docs-distex-brightgreen.svg
+   :alt: Documentation
    :target: http://rawgit.com/erdewit/distex/master/docs/html/api.html
