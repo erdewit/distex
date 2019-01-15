@@ -1,5 +1,4 @@
 import os
-import sys
 import asyncio
 import logging
 import argparse
@@ -7,15 +6,13 @@ import argparse
 from . import util
 
 
-
 class Server:
     """
     Serve requests from remote pools to spawn local processors.
     Each spawned processor will by itself connect back to the requesting pool.
-    
+
     Use only in a trusted network environment.
     """
-
     def __init__(self, host='0.0.0.0', port=util.DEFAULT_PORT, loop=None):
         self._host = host
         self._port = port
@@ -26,7 +23,7 @@ class Server:
 
     async def create(self):
         self._server = await asyncio.start_server(
-                self.handle_request, self._host, self._port, loop=self._loop)
+            self.handle_request, self._host, self._port, loop=self._loop)
         self._logger.info(f'Serving on port {self._port}')
 
     async def handle_request(self, reader, writer):
@@ -36,10 +33,12 @@ class Server:
         data = await reader.readline()
         nw, port, worker_loop = data.split()
         num_workers = int(nw) or os.cpu_count()
-        self._logger.info(f'Starting up {num_workers} processors for {peername}')
+        self._logger.info(
+            f'Starting up {num_workers} processors for {peername}')
 
         # start processors that will connect back to the remote server
-        asyncio.gather(*[asyncio.create_subprocess_exec(
+        asyncio.gather(
+            *[asyncio.create_subprocess_exec(
                 'distex_proc',
                 '-H', req_host, '-p', port, '-l', worker_loop,
                 stdout=None, stderr=None, loop=self._loop)
@@ -62,13 +61,16 @@ class Server:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-            description=('Run a process-spawning distex server. '
-                    'Use only in a trusted network environment.'),
-            formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('--host', '-H', dest='host', default='0.0.0.0',
-            type=str, help='local host to serve from')
-    parser.add_argument('--port', '-p', dest='port', default=util.DEFAULT_PORT,
-            type=int, help='port number to serve from')
+        formatter_class=argparse.RawTextHelpFormatter,
+        description=(
+            'Run a process-spawning distex server. '
+            'Use only in a trusted network environment.'))
+    parser.add_argument(
+        '--host', '-H', dest='host', default='0.0.0.0', type=str,
+        help='local host to serve from')
+    parser.add_argument(
+        '--port', '-p', dest='port', default=util.DEFAULT_PORT, type=int,
+        help='port number to serve from')
     args = parser.parse_args()
 
     util.logToConsole()

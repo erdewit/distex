@@ -56,9 +56,9 @@ async def chunk_async(ait, chunksize):
 
 def next_method(it):
     """
-    Get the method that yields next value from the given sync or async iterable.
-    Returns (method, is_sync) tuple of the method and a boolean of whether
-    the iterable is synchronous or not.
+    Get the method that yields next value from the given
+    sync or async iterable. Returns (method, is_sync) tuple of
+    the method and a boolean of whether the iterable is synchronous or not.
     """
     if hasattr(it, '__next__'):
         nxt = it.__next__
@@ -124,7 +124,7 @@ def logToFile(path, level=logging.INFO):
     logger = logging.getLogger()
     logger.setLevel(level)
     formatter = logging.Formatter(
-            '%(asctime)s %(name)s %(levelname)s %(message)s')
+        '%(asctime)s %(name)s %(levelname)s %(message)s')
     handler = logging.FileHandler(path)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -137,7 +137,7 @@ def logToConsole(level=logging.INFO):
     logger = logging.getLogger()
     logger.setLevel(level)
     formatter = logging.Formatter(
-            '%(asctime)s %(name)s %(levelname)s %(message)s')
+        '%(asctime)s %(name)s %(levelname)s %(message)s')
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     logger.addHandler(handler)

@@ -37,21 +37,24 @@ async def ait(it):
 
 class PoolTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         warnings.simplefilter("always")
 
-        self.pool = Pool(4, loop=loop, lazy_create=True)
-        self.reps = 100
-        self.x = [i for i in range(self.reps)]
-        self.y = [i * i for i in range(self.reps)]
-        self.z = [i * 2 for i in range(self.reps)]
-        self.xyz = list(zip(self.x, self.y, self.z))
+        cls.pool = Pool(4, loop=loop, lazy_create=True)
+        cls.reps = 100
+        cls.x = [i for i in range(cls.reps)]
+        cls.y = [i * i for i in range(cls.reps)]
+        cls.z = [i * 2 for i in range(cls.reps)]
+        cls.xyz = list(zip(cls.x, cls.y, cls.z))
 
-    def tearDown(self):
-        self.pool.shutdown()
+    @classmethod
+    def tearDownCls(cls):
+        cls.pool.shutdown()
 
     def assertNoWarnings(self, w):
-        self.assertEqual(len(w), 0, msg='\n'.join(str(warning.message) for warning in w))
+        self.assertEqual(
+            len(w), 0, msg='\n'.join(str(warning.message) for warning in w))
 
     def test_run_coro(self):
         with warnings.catch_warnings(record=True) as w:
@@ -70,8 +73,10 @@ class PoolTest(unittest.TestCase):
     def test_run_async(self):
 
         async def coro():
-            tasks = [self.pool.run_async(g, self.x[i], self.y[i],
-                    z=self.z[i]) for i in range(self.reps)]
+            tasks = [
+                self.pool.run_async(
+                    g, self.x[i], self.y[i], z=self.z[i])
+                for i in range(self.reps)]
             return await asyncio.gather(*tasks)
 
         with warnings.catch_warnings(record=True) as w:
@@ -85,7 +90,7 @@ class PoolTest(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             with self.assertRaises(RuntimeError):
                 loop.run_until_complete(
-                        self.pool.run_async(exc, 'Deliberatly thrown'))
+                    self.pool.run_async(exc, 'Deliberatly thrown'))
 
             self.assertNoWarnings(w)
 
@@ -96,8 +101,8 @@ class PoolTest(unittest.TestCase):
             return os.getpid()
 
         with warnings.catch_warnings(record=True) as w:
-            interference = self.pool.map(f,
-                    2 * self.x[:self.pool.total_workers() + 1])
+            interference = self.pool.map(  # noqa
+                f, 2 * self.x[:self.pool.total_workers() + 1])
             pids = loop.run_until_complete(self.pool.run_on_all_async(getpid))
             self.assertEqual(self.pool.total_workers(), len(set(pids)))
 
@@ -155,7 +160,8 @@ class PoolTest(unittest.TestCase):
     def test_ordered_map_3_arg_chunked(self):
         with warnings.catch_warnings(record=True) as w:
             expected = list(map(g, self.x, self.y, self.z))
-            actual = list(self.pool.map(g, self.x, self.y, self.z, chunksize=10))
+            actual = list(
+                self.pool.map(g, self.x, self.y, self.z, chunksize=10))
             self.assertEqual(actual, expected)
 
             self.assertNoWarnings(w)
@@ -202,8 +208,8 @@ class PoolTest(unittest.TestCase):
     def test_ordered_map_sync_async_iterators(self):
         with warnings.catch_warnings(record=True) as w:
             expected = list(itertools.starmap(g, self.xyz))
-            actual = list(self.pool.map(g,
-                        ait(self.x), ait(self.y), self.z))
+            actual = list(
+                self.pool.map(g, ait(self.x), ait(self.y), self.z))
             self.assertEqual(actual, expected)
 
             self.assertNoWarnings(w)

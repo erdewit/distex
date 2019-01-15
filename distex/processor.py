@@ -10,12 +10,10 @@ from distex import util
 signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
-
 class Processor(asyncio.Protocol):
     """
     Single process that works on tasks.
     """
-
     def __init__(self, host, port, unix_path, loop):
         self._host = host
         self._port = port
@@ -32,10 +30,10 @@ class Processor(asyncio.Protocol):
     async def create(self):
         if self._unix_path:
             self._transport, _ = await self._loop.create_unix_connection(
-                    lambda: self, self._unix_path)
+                lambda: self, self._unix_path)
         else:
             self._transport, _ = await self._loop.create_connection(
-                    lambda: self, self._host, self._port)
+                lambda: self, self._host, self._port)
 
     async def worker(self):
         while True:
@@ -61,7 +59,7 @@ class Processor(asyncio.Protocol):
                 success = 0
             del func, args, kwargs
             self._serializer.write_response(
-                    self._transport.write, success, result)
+                self._transport.write, success, result)
             del result
 
     def peername(self):
@@ -76,7 +74,8 @@ class Processor(asyncio.Protocol):
     def connection_lost(self, exc):
         self._loop.stop()
         if exc:
-            self._logger.error(f'Connection lost from {self.peername()}: {exc}')
+            self._logger.error(
+                f'Connection lost from {self.peername()}: {exc}')
 
     def data_received(self, data):
         for task in self._serializer.get_requests(data):
@@ -85,16 +84,18 @@ class Processor(asyncio.Protocol):
 
 def main():
     parser = argparse.ArgumentParser(
-            description='Run a single task processor',
-            formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('--host', '-H', dest='host',
-            type=str, help='connect to host')
-    parser.add_argument('--port', '-p', dest='port',
-            type=int, help='port number')
-    parser.add_argument('--unix_path', '-u', dest='unix_path',
-            type=str, help='connect to Unix domain socket')
-    parser.add_argument('--loop', '-l', dest='loop', default=0,
-            type=int, help='0=default 1=asyncio 2=uvloop 3=proactor 4=quamash')
+        description='Run a single task processor',
+        formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument(
+        '--host', '-H', dest='host', type=str, help='connect to host')
+    parser.add_argument(
+        '--port', '-p', dest='port', type=int, help='port number')
+    parser.add_argument(
+        '--unix_path', '-u', dest='unix_path', type=str,
+        help='connect to Unix domain socket')
+    parser.add_argument(
+        '--loop', '-l', dest='loop', default=0, type=int,
+        help='0=default 1=asyncio 2=uvloop 3=proactor 4=quamash')
     args = parser.parse_args()
 
     if args.loop == LoopType.default:
@@ -109,10 +110,11 @@ def main():
     elif args.loop == LoopType.quamash:
         import quamash
         import PyQt5.Qt as qt
-        _qapp = qt.QApplication([])
+        qapp = qt.QApplication([])  # noqa
         loop = quamash.QEventLoop()
     asyncio.set_event_loop(loop)
-    processor = Processor(args.host, args.port, args.unix_path, loop=loop)
+    processor = Processor(  # noqa
+        args.host, args.port, args.unix_path, loop=loop)
     loop.run_forever()
 
 

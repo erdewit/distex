@@ -3,8 +3,8 @@ import sys
 import codecs
 from setuptools import setup
 
-if sys.version_info < (3, 0, 0):
-    raise RuntimeError("distex is for Python 3")
+if sys.version_info < (3, 6, 0):
+    raise RuntimeError("Python 3.6 or higher required")
 
 here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
@@ -30,7 +30,9 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
     ],
-    keywords='python asyncio parallel distributed computing process pool task queue',
+    keywords=(
+        'python asyncio parallel distributed computing process '
+        'pool task queue'),
     packages=['distex'],
     entry_points={
         'console_scripts': [

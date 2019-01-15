@@ -64,7 +64,8 @@ class Pool:
 
         pool = Pool(0, ['mini/2'])
 
-    Local, remote SSH and remote non-SSH workers can all be combined in one pool:
+    Local, remote SSH and remote non-SSH workers can all be
+    combined in one pool:
 
     .. code-block:: python
 
@@ -79,15 +80,16 @@ class Pool:
 
     TimeoutError = concurrent.futures.TimeoutError
 
-    def __init__(self,
-            num_workers: int=None,
+    def __init__(
+            self,
+            num_workers: int = None,
             hosts=None,
-            qsize: int=2,
+            qsize: int = 2,
             initializer=None,
-            initargs: tuple=(),
-            localhost: str=None,
-            localport: int=None,
-            lazy_create: bool=False,
+            initargs: tuple = (),
+            localhost: str = None,
+            localport: int = None,
+            lazy_create: bool = False,
             worker_loop=LoopType.default,
             func_pickle=PickleType.dill,
             data_pickle=PickleType.pickle,
@@ -133,7 +135,7 @@ class Pool:
         .. _ssh-copy-id: https://linux.die.net/man/1/ssh-copy-id
         """
         self._num_workers = num_workers if num_workers is not None \
-                else os.cpu_count()
+            else os.cpu_count()
         self._hosts = hosts or []
         self._qsize = qsize
         self._initializer = initializer
@@ -193,16 +195,16 @@ class Pool:
         if sys.platform == "win32":
             await self._start_tcp_server()
             await self._start_local_processors(
-                    '-H', self._localhost or '127.0.0.1',
-                    '-p', str(self._localport),
-                    '-l', str(self._worker_loop))
+                '-H', self._localhost or '127.0.0.1',
+                '-p', str(self._localport),
+                '-l', str(self._worker_loop))
         else:
             if not all(spec.is_ssh for spec in hostSpecs):
                 await self._start_tcp_server()
             await self._start_unix_server()
             await self._start_local_processors(
-                    '-u', self._unix_path,
-                    '-l', str(self._worker_loop))
+                '-u', self._unix_path,
+                '-l', str(self._worker_loop))
 
         tasks = [self._add_host(spec) for spec in hostSpecs]
         await asyncio.gather(*tasks, loop=self._loop)
@@ -212,9 +214,10 @@ class Pool:
 
         await asyncio.sleep(0, loop=self._loop)  # needed for lazy_create
         if self._initializer:
-            tasks = [worker.run_task(
+            tasks = [
+                worker.run_task(
                     (self._initializer, self._initargs, {}, True, False))
-                    for worker in self._workers]
+                for worker in self._workers]
             await asyncio.gather(*tasks, loop=self._loop)
         self.ready.set()
 
@@ -222,36 +225,37 @@ class Pool:
         # start server that listens on a Unix socket
         self._unix_path = util.get_temp_path()
         self._unix_server = await self._loop.create_unix_server(
-                self._create_worker,
-                self._unix_path)
+            self._create_worker,
+            self._unix_path)
         self._logger.info('Started serving on Unix socket %s', self._unix_path)
 
     async def _start_tcp_server(self):
         # start server that listens on a TCP port
-        localhost = self._localhost or ('0.0.0.0' if self._hosts else
-                '127.0.0.1')
+        localhost = self._localhost or (
+            '0.0.0.0' if self._hosts else '127.0.0.1')
         if not self._localport:
             self._localport = util.get_random_port()
         self._tcp_server = await self._loop.create_server(
-                self._create_worker,
-                localhost, self._localport)
+            self._create_worker,
+            localhost, self._localport)
         self._logger.info(f'Started serving on port {self._localport}')
 
     async def _add_host(self, spec):
         if spec.is_ssh:
             await self._start_remote_processors_ssh(
-                    spec.host, spec.port, spec.num_workers)
+                spec.host, spec.port, spec.num_workers)
         else:
             await self._start_remote_processors(
-                    spec.host, spec.port, spec.num_workers)
+                spec.host, spec.port, spec.num_workers)
 
     async def _start_local_processors(self, *args):
         # spawn processors that will connect to our Unix or TCP server
-        tasks = [self._loop.subprocess_exec(
+        tasks = [
+            self._loop.subprocess_exec(
                 asyncio.SubprocessProtocol,
                 'distex_proc', *args,
                 stdout=None, stderr=None)
-                for _ in range(self._num_workers)]
+            for _ in range(self._num_workers)]
         self._procs = await asyncio.gather(*tasks, loop=self._loop)
         self._total_workers += self._num_workers
 
@@ -260,7 +264,7 @@ class Pool:
         # on what port they can find our TCP server
         _reader, writer = await asyncio.open_connection(host, port)
         writer.write(b'%d %d %d\n' % (
-                num_workers, self._localport, self._worker_loop))
+            num_workers, self._localport, self._worker_loop))
         await writer.drain()
         writer.close()
         self._total_workers += num_workers
@@ -271,13 +275,14 @@ class Pool:
         port_arg = ('-p', port) if port else ()
         remote_unix_path = util.get_temp_path()
         proc = await asyncio.create_subprocess_exec(
-                'ssh', '-T', host, *port_arg,
-                '-R', f'{remote_unix_path}:{self._unix_path}',
-                stdin=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE)
+            'ssh', '-T', host, *port_arg,
+            '-R', f'{remote_unix_path}:{self._unix_path}',
+            stdin=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE)
         # spawn processors that will connect to the tunneled Unix server
-        cmd = (f'distex_proc -u {remote_unix_path} -l {self._worker_loop} '
-                '& \n'.encode()) * num_workers
+        cmd = (
+            f'distex_proc -u {remote_unix_path} -l {self._worker_loop} '
+            '& \n'.encode()) * num_workers
         proc.stdin.write(cmd)
         await proc.stdin.drain()
         self._ssh_tunnels.append(proc)
@@ -383,8 +388,9 @@ class Pool:
         except StopAsyncIteration:
             pass
 
-    async def map_async(self, func, *iterables,
-            timeout=None, chunksize=1, ordered=True, star=False):
+    async def map_async(
+            self, func, *iterables, timeout=None,
+            chunksize=1, ordered=True, star=False):
         """
         Async version of ``map``. This runs with less overhead than ``map``
         and can be twice as fast for small tasks.
@@ -409,8 +415,8 @@ class Pool:
         run_task = self._run_task
         input_consumed = False
         do_map = chunksize > 1
-        is_sync = all(isinstance(it, collections.abc.Iterable)
-                for it in iterables)
+        is_sync = all(
+            isinstance(it, collections.abc.Iterable) for it in iterables)
 
         if is_sync:
             if len(iterables) > 1:
@@ -439,8 +445,9 @@ class Pool:
                     # schedule as many tasks as possible
                     for _ in range(self._slots.num_free):
                         args = get_args() if is_sync else await get_args()
-                        tasks.append(create_task(run_task(
-                                (func, args, None, star, do_map))))
+                        tasks.append(
+                            create_task(
+                                run_task((func, args, None, star, do_map))))
                 except (StopIteration, StopAsyncIteration):
                     input_consumed = True
 
@@ -451,8 +458,8 @@ class Pool:
                 # wait for a slot to become ready
                 ready = self._slots.slot_ready()
                 if timeout is not None:
-                    ready = asyncio.wait_for(ready,
-                            end_time - self._loop.time())
+                    ready = asyncio.wait_for(
+                        ready, end_time - self._loop.time())
                 await ready
 
                 # yield as many results as possible
@@ -484,7 +491,7 @@ class Pool:
         in the pool and wait for the result.
         """
         return self._loop.run_until_complete(
-                self.run_async(func, *args, **kwargs))
+            self.run_async(func, *args, **kwargs))
 
     async def run_async(self, func, *args, **kwargs):
         """
@@ -509,7 +516,7 @@ class Pool:
         This can be used for initializing, cleanup, intermittent polling, etc.
         """
         return self._loop.run_until_complete(
-                self.run_on_all_async(func, *args, **kwargs))
+            self.run_on_all_async(func, *args, **kwargs))
 
     async def run_on_all_async(self, func, *args, **kwargs):
         """
@@ -521,8 +528,9 @@ class Pool:
 
         await self._drain()
 
-        tasks = [worker.run_task((func, args, kwargs, True, False))
-                for worker in self._workers]
+        tasks = [
+            worker.run_task((func, args, kwargs, True, False))
+            for worker in self._workers]
         results = await asyncio.gather(*tasks, loop=self._loop)
         for success, result in results:
             if not success:
@@ -574,7 +582,7 @@ class RemoteException(Exception):
     def __init__(self, exc, tb=None):
         self.exc = exc
         tb = tb or traceback.format_exception(
-                type(exc), exc, exc.__traceback__)
+            type(exc), exc, exc.__traceback__)
         self.tb = ''.join(tb)
 
     def __str__(self):

@@ -107,3 +107,4 @@ docs/doctrees/
 tests/test.py
 docs/html/.buildinfo
 .idea
+.vscode

@@ -6,8 +6,9 @@ class SlotPool:
     """
     Pool that manages a limited number of contendable resource slots.
     """
-    __slots__ = ('num_free', 'capacity', '_slots',
-            '_loop', '_get_waiters', '_slot_ready_waiter')
+    __slots__ = (
+        'num_free', 'capacity', '_slots',
+        '_loop', '_get_waiters', '_slot_ready_waiter')
 
     def __init__(self, *, loop=None):
         self.num_free = 0
@@ -46,7 +47,7 @@ class SlotPool:
             self._get_waiters.append(fut)
             try:
                 await fut
-            except:
+            except Exception:
                 fut.cancel()
                 if self._slots and not fut.cancelled():
                     self._wake_up_next()

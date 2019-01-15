@@ -8,12 +8,13 @@ class Worker:
     """
     Worker that submits tasks to and gets results from a
     local or remote processor.
-    
+
     Implements asyncio.Protocol.
     """
 
-    __slots__ = ('futures', 'tasks', 'loop', 'disconnected',
-            'peername', 'serializer', 'transport')
+    __slots__ = (
+        'futures', 'tasks', 'loop', 'disconnected',
+        'peername', 'serializer', 'transport')
 
     def __init__(self, serializer, loop):
         self.serializer = serializer
