@@ -136,7 +136,7 @@ class Pool:
         """
         self._num_workers = num_workers if num_workers is not None \
             else os.cpu_count()
-        self._hosts = hosts or []
+        self._hosts = [hosts] if type(hosts) is str else hosts if hosts else []
         self._qsize = qsize
         self._initializer = initializer
         self._initargs = initargs
