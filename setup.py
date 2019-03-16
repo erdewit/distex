@@ -10,8 +10,8 @@ here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
-path = os.path.join('.', 'distex', 'version.py')
-__version__ = eval(open(path).read())
+__version__ = None
+exec(open(os.path.join(here, 'distex', 'version.py')).read())
 
 setup(
     name='distex',
