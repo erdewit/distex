@@ -13,4 +13,8 @@ Release |release|.
 
 Pool
 ----
-.. automodule:: distex.pool
+.. autoclass:: distex.pool.Pool
+
+PoolMap
+-------
+.. autoclass:: distex.poolmap.PoolMap

@@ -39,5 +39,5 @@ setup(
             'distex_proc=distex.processor:main'
         ]
     },
-    install_requires=['dill', 'cloudpickle'],
+    install_requires=['dill', 'cloudpickle', 'eventkit'],
 )

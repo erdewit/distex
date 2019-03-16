@@ -1,7 +1,7 @@
-import os
-from .pool import *
+from .pool import Pool, RemoteException, HostSpec, PickleType, LoopType
+from .poolmap import PoolMap
 
-path = os.path.join(__path__[0], 'version.py')
-__version__ = eval(open(path).read())
+from .version import __version__, __version_info__  # noqa
 
-__all__ = pool.__all__
+__all__ = [
+    'Pool', 'RemoteException', 'HostSpec', 'PickleType', 'LoopType', 'PoolMap']

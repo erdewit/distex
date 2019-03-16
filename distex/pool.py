@@ -15,9 +15,6 @@ from .serializer import Serializer, PickleType
 from . import util
 
 
-__all__ = ['Pool', 'RemoteException', 'HostSpec', 'PickleType', 'LoopType']
-
-
 class LoopType(IntEnum):
     default = 0
     asyncio = 1
@@ -28,12 +25,6 @@ class LoopType(IntEnum):
 
 class Pool:
     """
-    .. warning::
-
-       Use a non-ssh process pool only in a trusted network environment.
-       Both the pool and the spawning server can in principle allow anyone
-       on the network to run arbitrary code.
-
     Pool of local and remote workers that can run tasks.
 
     To create a process pool of 4 local workers:
@@ -46,23 +37,30 @@ class Pool:
 
     .. code-block:: python
 
-        pool = Pool(0, ['ssh://maxi/8'])
+        pool = Pool(0, 'ssh://maxi/8')
 
-    Note that distex must be installed on all remote hosts.
+    ``distex`` must be installed on all remote hosts and the ``distex_proc``
+    script must be in the path. Test this with ``ssh <host> distex_proc``.
     When using SSH it is not necessary to have a distex server running
-    on the hosts. When not using SSH a spawning server has to be started
+    on the hosts.
+
+    When not using SSH a spawning server has to be started
     first on all hosts involved:
 
     .. code-block:: python
 
         python3 -m distex.server
 
+    .. warning::
+
+        Only use this in a trusted network environment.
+
     With the server running on host ``mini``,
     to create a pool of 2 workers running there:
 
     .. code-block:: python
 
-        pool = Pool(0, ['mini/2'])
+        pool = Pool(0, 'mini/2')
 
     Local, remote SSH and remote non-SSH workers can all be
     combined in one pool:
@@ -95,41 +93,45 @@ class Pool:
             data_pickle=PickleType.pickle,
             loop=None):
         """
-        Parameters:
+        Args:
+            num_workers: Number of local process workers. The default of
+              None will use the number of CPUs.
+            hosts: List of remote host specification strings in the format
+              ``[ssh://][username@]hostname[:portnumber]/num_workers``.
 
-        * ``num_workers``: Number of local process workers. The default of
-          None will use the number of CPUs.
-        * ``hosts``: List of remote host specification strings in the format
-          ``[ssh://][username@]hostname[:portnumber]/num_workers``.
-        * ``qsize``: Number of pending tasks per worker.
-          To improve the throughput of small tasks this can be increased
-          from the default of 2.
-          If no queueing is desired then it can be set to 1.
-        * ``initializer``: Callable to initialize worker processes.
-        * ``initargs``: Arguments tuple that is unpacked into the initializer.
-        * ``localhost``: Local TCP server (if any) will listen on this address.
-        * ``localport``: Local TCP server (if any) will listen on this port
-          (default: random open port).
-        * ``lazy_create``: If True then no workers will be created until the
-          first task is submitted.
-        * ``worker_loop``: ``LoopType`` to use for workers.
-            0. default (=uvloop when available, proactor on Windows)
-            1. asyncio (standard selector event loop)
-            2. uvloop (Unix only)
-            3. proactor (Windows only)
-            4. quamash (PyQt)
-        * ``func_pickle`` and ``data_pickle``:
-            ``PickleType`` to set the  respective pickle modules to use \
-            for serializing functions and for serializing data \
-            (data meaning task arguments and results).
+            qsize: Number of pending tasks per worker.
+              To improve the throughput of small tasks this can be increased
+              from the default of 2.
+              If no queueing is desired then it can be set to 1.
+            initializer: Callable to initialize worker processes.
+            initargs: Arguments tuple that is unpacked into the initializer.
+            localhost: Local TCP server (if any) will listen on this address.
+            localport: Local TCP server (if any) will listen on this port
+              (default: random open port).
+            lazy_create: If True then no workers will be created until the
+              first task is submitted.
+            worker_loop:
+              ``LoopType`` to use for workers:
 
-            0. pickle
-            1. cloudpickle
-            2. dill
-        * ``loop``: The asyncio event loop to run the pool in.
+                0. default (=uvloop when available, proactor on Windows)
+                1. asyncio (standard selector event loop)
+                2. uvloop (Unix only)
+                3. proactor (Windows only)
+                4. quamash (PyQt)
+            func_pickle: ``PickleType`` to to use for serializing functions:
 
-        ``distex.Pool`` implements the concurrent.futures.Executor interface
-        and can be used in the place of ProcessPoolExecutor.
+                0. pickle
+                1. cloudpickle
+                2. dill
+            data_pickle: ``PickleType`` to to use for data:
+
+                0. pickle
+                1. cloudpickle
+                2. dill
+            loop: The asyncio event loop to run the pool in.
+
+        ``distex.Pool`` implements the ``concurrent.futures.Executor``
+        interface and can be used in the place of ProcessPoolExecutor.
 
         .. _ssh-keygen: https://linux.die.net/man/1/ssh-keygen
         .. _ssh-copy-id: https://linux.die.net/man/1/ssh-copy-id
@@ -181,6 +183,9 @@ class Pool:
     async def __aexit__(self, *_excinfo):
         await self.shutdown_async()
 
+    def __await__(self):
+        return self.create().__await__()
+
     async def create(self):
         """
         Coroutine to create local processors and servers and
@@ -220,6 +225,7 @@ class Pool:
                 for worker in self._workers]
             await asyncio.gather(*tasks, loop=self._loop)
         self.ready.set()
+        return self
 
     async def _start_unix_server(self):
         # start server that listens on a Unix socket
@@ -311,7 +317,7 @@ class Pool:
 
     def total_workers(self) -> int:
         """
-        Total numer of workers in the pool.
+        Total number of workers in the pool.
         """
         return self._total_workers
 
@@ -341,29 +347,27 @@ class Pool:
         Map the function onto the given iterable(s) and
         return an iterator that yields the results.
 
-        Parameters:
+        Args:
 
-        * ``func`` is a callable. If what the callable returns
-          is awaitable then it will be awaited and the result is returned.
-
-        * ``iterables``: Sync or async iterables (in any combination)
-          that yield the arguments for ``func``. The iterables can
-          be unbounded (i.e. they don't need to have a length).
-
-        * ``timeout``: Timeout in seconds since map is started.
-
-        * ``chunksize``: Iterator will be chunked up to this size.
-          A larger chunksize can greatly improve efficiency for small tasks.
-
-        * ``ordered``: If true then the order of results preserves the
-          order of the input iterables. If false then the results are
-          in order of completion. It is more efficient to use ordered=True.
-
-        * ``star``: If true then there can be only one iterable and it must
-          yield sequences (such as tuples). The sequences will be
-          unpacked ('starred') into ``func``.
-          If false then the values that the iterators yield will be supplied
-          in-place to ``func``.
+            func: Function to map. If it returns an awaitable then the
+              result is awaited and returned.
+            iterables: Sync or async iterables (in any combination)
+              that yield the arguments for ``func``. The iterables can
+              be unbounded (i.e. they don't need to have a length).
+            timeout: Timeout in seconds since map is started.
+            chunksize: Iterator is chunked up to this size.
+              A larger chunksize can greatly improve efficiency
+              for small tasks.
+            ordered:
+                * ``True``: The order of results preserves the
+                  order of the input iterables.
+                * ``False``: The results are in order of completion.
+            star:
+                * ``True``: There can be only one iterable and it must
+                  yield sequences (such as tuples). The sequences are
+                  unpacked ('starred') into ``func``.
+                * ``False``: The values that the iterators yield are
+                  supplied in-place to ``func``.
 
         .. tip::
 
@@ -373,7 +377,6 @@ class Pool:
            constant arguments; Then do the mapping with the bound function and
            with lesser arguments. Especially when map uses large constant
            datasets this can be beneficial.
-
         """
         run = self._loop.run_until_complete
         agen = self._map(func, iterables, timeout, chunksize, ordered, star)
@@ -495,7 +498,7 @@ class Pool:
 
     async def run_async(self, func, *args, **kwargs):
         """
-        Asynchronlously run the function with the given arguments
+        Asynchronously run the function with the given arguments
         in the pool and return the result when it becomes available.
         """
         if not self._create_called:
@@ -554,7 +557,7 @@ class Pool:
         if self._loop.is_running():
             asyncio.ensure_future(coro)
         else:
-            self._loop.run_until_complete(self.shutdown_async(wait))
+            self._loop.run_until_complete(coro)
 
     async def shutdown_async(self, wait=True):
         if not self._total_workers:

@@ -47,7 +47,7 @@ async def chunk_async(ait, chunksize):
             for _ in range(chunksize):
                 r.append(await nxt())
             yield tuple(r)
-            del r[:]
+            r = []
     except (StopIteration, StopAsyncIteration):
         pass
     if r:

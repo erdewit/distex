@@ -97,6 +97,9 @@ def main():
         '--loop', '-l', dest='loop', default=0, type=int,
         help='0=default 1=asyncio 2=uvloop 3=proactor 4=quamash')
     args = parser.parse_args()
+    if not args.port and not args.unix_path:
+        print('distex installed OK')
+        return
 
     if args.loop == LoopType.default:
         loop = util.get_loop()

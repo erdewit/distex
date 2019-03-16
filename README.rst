@@ -3,20 +3,21 @@
 Introduction
 ============
 
-The distex package provides a distributed process pool that uses
+Distex offers a distributed process pool to utilize multiple CPUs or machines.
+It uses
 `asyncio <https://docs.python.org/3.6/library/asyncio.html>`_
-to efficiently manage the local and remote worker processes.
+to efficiently manage the worker processes.
 
 Features:
 
 * Scales from 1 to 1000's of processors;
 * Can handle in the order of 50.000 small tasks per second;
-* Easy to use with ssh (secure shell);
-* Full asynchronous support;
+* Easy to use with SSH (secure shell) hosts;
+* Full async support;
 * Maps over unbounded iterables;
-* Choice of ``pickle``, ``dill`` or ``cloudpickle`` serialization for
-  functions and data;
-* Backward compatible with ``concurrent.futures.ProcessPool`` (PEP3148_).
+* Compatible with
+  `concurrent.futures.ProcessPool <https://docs.python.org/3/library/concurrent.futures.html>`_
+  (or PEP3148_).
 
 
 Installation
@@ -25,6 +26,14 @@ Installation
 ::
 
     pip3 install -U distex
+
+When using remote hosts then distex must be installed on those too.
+Make sure that the ``distex_proc`` script can be found in the path.
+
+For SSH hosts: Authentication should be done with SSH keys since there is
+no support for passwords. The remote installation  can be tested with::
+
+    ssh <host> distex_proc
 
 Dependencies:
 
@@ -35,7 +44,7 @@ Dependencies:
 Examples
 --------
 
-A process pool can have local and remote workers in any combination.
+A process pool can have local and remote workers.
 Here is a pool that uses 4 local workers:
 
 .. code-block:: python
@@ -53,7 +62,25 @@ To create a pool that also uses 8 workers on host ``maxi``, using ssh:
 
 .. code-block:: python
 
-    pool = Pool(4, ['ssh://maxi/8'])
+    pool = Pool(4, 'ssh://maxi/8')
+
+To use a pool in combination with
+`eventkit <https://github.com/erdewit/eventkit>`_:
+
+.. code-block:: python
+
+    from distex import Pool
+    import eventkit as ev
+    import bz2
+
+    pool = Pool()
+    # await pool  # un-comment in Jupyter
+    data = [b'A' * 1000000] * 1000
+
+    pipe = ev.Sequence(data).poolmap(pool, bz2.compress).map(len).mean().last()
+
+    print(pipe.run())  # in Jupyter: print(await pipe)
+    pool.shutdown()
 
 There is full support for every asynchronous construct imaginable:
 
@@ -91,6 +118,7 @@ There is full support for every asynchronous construct imaginable:
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
 
+
 High level architecture
 -----------------------
 
@@ -109,62 +137,15 @@ to the local Unix socket that the local server is listening on.
 Multiple workers on a remote machine will use the same Unix socket and
 share the same ssh tunnel.
 
+The plain ``ssh`` executable is used instead of much nicer solutions such
+as `AsyncSSH <https://github.com/ronf/asyncssh>`_. This is to keep the
+CPU usage of encrypting/decrypting outside of the event loop and offload
+it to the ``ssh`` process(es).
+
 Documentation
 -------------
 
 `Distex documentation <http://rawgit.com/erdewit/distex/master/docs/html/api.html>`_
-
-
-Changelog
----------
-
-Version 0.5.9
-^^^^^^^^^^^^^
-* Make pool.shutdown() possible when event loop is already running
-
-Version 0.5.8
-^^^^^^^^^^^^^
-* PR #9 merged to fix server script
-
-Version 0.5.7
-^^^^^^^^^^^^^
-* distex_proc entry point is now used to allow various Python setups
-
-Version 0.5.6
-^^^^^^^^^^^^^
-
-* Fixed issue #5
-
-Version 0.5.5
-^^^^^^^^^^^^^
-
-* Optimizations; some logging issues fixed.
-
-Version 0.5.4
-^^^^^^^^^^^^^
-
-* Fixed issue #4
-
-Version 0.5.3
-^^^^^^^^^^^^^
-
-* Small scheduling improvements
-
-Version 0.5.2
-^^^^^^^^^^^^^
-
-* Optimizations for large data
-* Better error handling when result can't be pickled
-
-Version 0.5.1
-^^^^^^^^^^^^^
-
-* Fixes for Windows
-
-Version 0.5.0
-^^^^^^^^^^^^^
-
-* Initial release
 
 
 :author: Ewald de Wit <ewald.de.wit@gmail.com>
