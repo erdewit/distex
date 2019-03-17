@@ -175,6 +175,6 @@ Documentation
 .. |License| image:: https://img.shields.io/badge/license-BSD-blue.svg
    :alt:
 
-.. |Docs| image:: https://img.shields.io/badge/docs-distex-brightgreen.svg
+.. |Docs| image:: https://readthedocs.org/projects/distex/badge/?version=latest
    :alt: Documentation
-   :target: http://rawgit.com/erdewit/distex/master/docs/html/api.html
+   :target: https://distex.readthedocs.io/
