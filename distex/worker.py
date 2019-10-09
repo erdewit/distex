@@ -65,7 +65,8 @@ class Worker:
         self.transport = None
 
     def data_received(self, data):
-        for resp in self.serializer.get_responses(data):
+        self.serializer.add_data(data)
+        for resp in self.serializer.get_responses():
             self.futures.popleft().set_result(resp)
             self.tasks.popleft()
 

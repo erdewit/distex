@@ -4,7 +4,7 @@ import logging
 import signal
 
 from distex.pool import LoopType, RemoteException
-from distex.serializer import Serializer
+from distex.serializer import ServerSerializer
 from distex import util
 
 signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -19,10 +19,10 @@ class Processor(asyncio.Protocol):
         self._port = port
         self._unix_path = unix_path
         self._loop = loop
-        self._queue = asyncio.Queue()
+        self._data_q = asyncio.Queue()
         self._transport = None
         self._last_func = None
-        self._serializer = Serializer()
+        self._serializer = ServerSerializer()
         self._worker_task = loop.create_task(self.worker())
         self._logger = logging.getLogger('distex.Processor')
         loop.run_until_complete(self.create())
@@ -37,30 +37,36 @@ class Processor(asyncio.Protocol):
 
     async def worker(self):
         while True:
-            func, args, kwargs, do_star, do_map = await self._queue.get()
-            try:
-                if do_map:
-                    if do_star:
-                        result = [func(*a) for a in args]
+            data = await self._data_q.get()
+            self._serializer.add_data(data)
+            while True:
+                try:
+                    task = self._serializer.get_request()
+                    if not task:
+                        break
+                    func, args, kwargs, do_star, do_map = task
+                    if do_map:
+                        if do_star:
+                            result = [func(*a) for a in args]
+                        else:
+                            result = [func(a) for a in args]
+                        if result and hasattr(result[0], '__await__'):
+                            result = [await r for r in result]
                     else:
-                        result = [func(a) for a in args]
-                    if result and hasattr(result[0], '__await__'):
-                        result = [await r for r in result]
-                else:
-                    if do_star:
-                        result = func(*args, **kwargs)
-                    else:
-                        result = func(args)
-                    if hasattr(result, '__await__'):
-                        result = await result
-                success = 1
-            except Exception as e:
-                result = RemoteException(e)
-                success = 0
-            del func, args, kwargs
-            self._serializer.write_response(
-                self._transport.write, success, result)
-            del result
+                        if do_star:
+                            result = func(*args, **kwargs)
+                        else:
+                            result = func(args)
+                        if hasattr(result, '__await__'):
+                            result = await result
+                    success = 1
+                    del func, args, kwargs
+                except Exception as e:
+                    result = RemoteException(e)
+                    success = 0
+                self._serializer.write_response(
+                    self._transport.write, success, result)
+                del result
 
     def peername(self):
         if self._unix_path:
@@ -78,8 +84,7 @@ class Processor(asyncio.Protocol):
                 f'Connection lost from {self.peername()}: {exc}')
 
     def data_received(self, data):
-        for task in self._serializer.get_requests(data):
-            self._queue.put_nowait(task)
+        self._data_q.put_nowait(data)
 
 
 def main():

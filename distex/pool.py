@@ -11,7 +11,7 @@ from contextlib import suppress
 
 from .worker import Worker
 from .slotpool import SlotPool
-from .serializer import Serializer, PickleType
+from .serializer import ClientSerializer, PickleType
 from . import util
 
 
@@ -295,7 +295,7 @@ class Pool:
         self._total_workers += num_workers
 
     def _create_worker(self):
-        serializer = Serializer(self._func_pickle, self._data_pickle)
+        serializer = ClientSerializer(self._data_pickle, self._func_pickle)
         worker = Worker(serializer, self._loop)
         worker.disconnected = self._on_worker_disconnected
         self._workers.append(worker)

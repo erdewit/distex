@@ -232,7 +232,7 @@ class PoolTest(unittest.TestCase):
             expected = g(1, 2, 3)
             loop.set_default_executor(self.pool)
             actual = loop.run_until_complete(
-                    loop.run_in_executor(None, g, 1, 2, 3))
+                loop.run_in_executor(None, g, 1, 2, 3))
             self.assertEqual(actual, expected)
 
             self.assertNoWarnings(w)
