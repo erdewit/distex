@@ -152,8 +152,8 @@ class Pool:
             raise ValueError('num_workers must be >= 0')
         if self._qsize < 1:
             raise ValueError('qsize must be >= 1')
-        self.ready = asyncio.Event(loop=self._loop)
-        self._worker_added = asyncio.Event(loop=self._loop)
+        self.ready = asyncio.Event()
+        self._worker_added = asyncio.Event()
         self._logger = logging.getLogger('distex.Pool')
         self._reset()
         if not lazy_create and not self._loop.is_running():
