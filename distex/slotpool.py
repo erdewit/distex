@@ -10,11 +10,11 @@ class SlotPool:
         'num_free', 'capacity', '_slots',
         '_loop', '_get_waiters', '_slot_ready_waiter')
 
-    def __init__(self, *, loop=None):
+    def __init__(self):
         self.num_free = 0
         self.capacity = 0
         self._slots = deque()
-        self._loop = loop or asyncio.get_event_loop()
+        self._loop = asyncio.get_event_loop()
         self._get_waiters = deque()
         self._slot_ready_waiter = None
 

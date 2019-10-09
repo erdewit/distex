@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from collections import deque
 
@@ -16,9 +17,9 @@ class Worker:
         'futures', 'tasks', 'loop', 'disconnected',
         'peername', 'serializer', 'transport')
 
-    def __init__(self, serializer, loop):
+    def __init__(self, serializer):
         self.serializer = serializer
-        self.loop = loop
+        self.loop = asyncio.get_event_loop()
         self.transport = None
         self.peername = None
         self.disconnected = None

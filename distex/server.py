@@ -13,17 +13,17 @@ class Server:
 
     Use only in a trusted network environment.
     """
-    def __init__(self, host='0.0.0.0', port=util.DEFAULT_PORT, loop=None):
+    def __init__(self, host='0.0.0.0', port=util.DEFAULT_PORT):
         self._host = host
         self._port = port
-        self._loop = loop or asyncio.get_event_loop()
+        self._loop = asyncio.get_event_loop()
         self._server = None
         self._logger = logging.getLogger('distex.Server')
         self._loop.run_until_complete(self.create())
 
     async def create(self):
         self._server = await asyncio.start_server(
-            self.handle_request, self._host, self._port, loop=self._loop)
+            self.handle_request, self._host, self._port)
         self._logger.info(f'Serving on port {self._port}')
 
     async def handle_request(self, reader, writer):
@@ -41,7 +41,7 @@ class Server:
             *[asyncio.create_subprocess_exec(
                 'distex_proc',
                 '-H', req_host, '-p', port, '-l', worker_loop,
-                stdout=None, stderr=None, loop=self._loop)
+                stdout=None, stderr=None)
                 for _ in range(num_workers)])
 
         writer.close()

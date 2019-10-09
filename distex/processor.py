@@ -14,18 +14,18 @@ class Processor(asyncio.Protocol):
     """
     Single process that works on tasks.
     """
-    def __init__(self, host, port, unix_path, loop):
+    def __init__(self, host, port, unix_path):
         self._host = host
         self._port = port
         self._unix_path = unix_path
-        self._loop = loop
+        self._loop = asyncio.get_event_loop()
         self._data_q = asyncio.Queue()
         self._transport = None
         self._last_func = None
         self._serializer = ServerSerializer()
-        self._worker_task = loop.create_task(self.worker())
+        self._worker_task = self._loop.create_task(self.worker())
         self._logger = logging.getLogger('distex.Processor')
-        loop.run_until_complete(self.create())
+        self._loop.run_until_complete(self.create())
 
     async def create(self):
         if self._unix_path:
@@ -122,7 +122,7 @@ def main():
         loop = quamash.QEventLoop()
     asyncio.set_event_loop(loop)
     processor = Processor(  # noqa
-        args.host, args.port, args.unix_path, loop=loop)
+        args.host, args.port, args.unix_path)
     loop.run_forever()
 
 

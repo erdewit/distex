@@ -90,8 +90,7 @@ class Pool:
             lazy_create: bool = False,
             worker_loop=LoopType.default,
             func_pickle=PickleType.dill,
-            data_pickle=PickleType.pickle,
-            loop=None):
+            data_pickle=PickleType.pickle):
         """
         Args:
             num_workers: Number of local process workers. The default of
@@ -128,7 +127,6 @@ class Pool:
                 0. pickle
                 1. cloudpickle
                 2. dill
-            loop: The asyncio event loop to run the pool in.
 
         ``distex.Pool`` implements the ``concurrent.futures.Executor``
         interface and can be used in the place of ProcessPoolExecutor.
@@ -144,7 +142,7 @@ class Pool:
         self._initargs = initargs
         self._localhost = localhost
         self._localport = localport
-        self._loop = loop or asyncio.get_event_loop()
+        self._loop = asyncio.get_event_loop()
         self._worker_loop = int(worker_loop)
         self._func_pickle = int(func_pickle)
         self._data_pickle = int(data_pickle)
@@ -167,7 +165,7 @@ class Pool:
         self._procs = []
         self._total_workers = 0
         self._workers = []
-        self._slots = SlotPool(loop=self._loop)
+        self._slots = SlotPool()
         self._create_called = False
 
     def __enter__(self):
@@ -212,18 +210,18 @@ class Pool:
                 '-l', str(self._worker_loop))
 
         tasks = [self._add_host(spec) for spec in hostSpecs]
-        await asyncio.gather(*tasks, loop=self._loop)
+        await asyncio.gather(*tasks)
 
         while len(self._workers) < self._total_workers:
             await self._worker_added.wait()
 
-        await asyncio.sleep(0, loop=self._loop)  # needed for lazy_create
+        await asyncio.sleep(0)  # needed for lazy_create
         if self._initializer:
             tasks = [
                 worker.run_task(
                     (self._initializer, self._initargs, {}, True, False))
                 for worker in self._workers]
-            await asyncio.gather(*tasks, loop=self._loop)
+            await asyncio.gather(*tasks)
         self.ready.set()
         return self
 
@@ -262,7 +260,7 @@ class Pool:
                 'distex_proc', *args,
                 stdout=None, stderr=None)
             for _ in range(self._num_workers)]
-        self._procs = await asyncio.gather(*tasks, loop=self._loop)
+        self._procs = await asyncio.gather(*tasks)
         self._total_workers += self._num_workers
 
     async def _start_remote_processors(self, host, port, num_workers):
@@ -296,7 +294,7 @@ class Pool:
 
     def _create_worker(self):
         serializer = ClientSerializer(self._data_pickle, self._func_pickle)
-        worker = Worker(serializer, self._loop)
+        worker = Worker(serializer)
         worker.disconnected = self._on_worker_disconnected
         self._workers.append(worker)
         self._slots.extend((worker,) * self._qsize)
@@ -534,7 +532,7 @@ class Pool:
         tasks = [
             worker.run_task((func, args, kwargs, True, False))
             for worker in self._workers]
-        results = await asyncio.gather(*tasks, loop=self._loop)
+        results = await asyncio.gather(*tasks)
         for success, result in results:
             if not success:
                 raise result
@@ -545,7 +543,7 @@ class Pool:
         Let all current tasks finish.
         """
         tasks = [self._slots.get() for _ in range(self._slots.capacity)]
-        slots = await asyncio.gather(*tasks, loop=self._loop)
+        slots = await asyncio.gather(*tasks)
         for slot in slots:
             self._slots.put(slot)
 

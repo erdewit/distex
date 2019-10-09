@@ -41,7 +41,7 @@ class PoolTest(unittest.TestCase):
     def setUpClass(cls):
         warnings.simplefilter("always")
 
-        cls.pool = Pool(4, loop=loop, lazy_create=True)
+        cls.pool = Pool(4, lazy_create=True)
         cls.reps = 100
         cls.x = [i for i in range(cls.reps)]
         cls.y = [i * i for i in range(cls.reps)]
