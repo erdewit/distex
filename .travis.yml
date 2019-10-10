@@ -6,11 +6,11 @@ python:
   - "nightly"
 env:
   - LOOP=asyncio
-  - LOOP=uvloop
+  # - LOOP=uvloop
 install:
   - if [[ "$LOOP" != "asyncio" ]]; then pip install $LOOP; fi;
   - pip install .
   - pip install -r requirements.txt
 script:
-  - python3 tests/pool_test.py 
+  - python3 tests/pool_test.py
 
