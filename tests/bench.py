@@ -4,7 +4,6 @@ import cProfile
 import pstats
 import asyncio
 import traceback
-import logging
 
 from distex import Pool, util
 
@@ -39,11 +38,12 @@ def main():
 
     async def run():
         result = await asyncio.gather(
-                *[pool.run_async(g, i) for i in range(REPS)])
+            *[pool.run_async(g, i) for i in range(REPS)])
         print(result)
 
     async def map_async():
-        async for result in pool.map_async(g, range(REPS), star=False,
+        async for result in pool.map_async(
+                g, range(REPS), star=False,
                 chunksize=1, ordered=True, timeout=None):
             pass
 #             print(result)
