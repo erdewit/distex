@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>distex.pool &mdash; distex 0.6.0 documentation</title>
+  <title>distex.pool &mdash; distex 0.7.0 documentation</title>
   
 
   
@@ -19,32 +19,34 @@
   
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -58,7 +60,7 @@
             
             
               <div class="version">
-                0.6
+                0.7
               </div>
             
           
@@ -160,7 +162,7 @@
 
 <span class="kn">from</span> <span class="nn">.worker</span> <span class="k">import</span> <span class="n">Worker</span>
 <span class="kn">from</span> <span class="nn">.slotpool</span> <span class="k">import</span> <span class="n">SlotPool</span>
-<span class="kn">from</span> <span class="nn">.serializer</span> <span class="k">import</span> <span class="n">Serializer</span><span class="p">,</span> <span class="n">PickleType</span>
+<span class="kn">from</span> <span class="nn">.serializer</span> <span class="k">import</span> <span class="n">ClientSerializer</span><span class="p">,</span> <span class="n">PickleType</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">util</span>
 
 
@@ -239,8 +241,7 @@
             <span class="n">lazy_create</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">worker_loop</span><span class="o">=</span><span class="n">LoopType</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
             <span class="n">func_pickle</span><span class="o">=</span><span class="n">PickleType</span><span class="o">.</span><span class="n">dill</span><span class="p">,</span>
-            <span class="n">data_pickle</span><span class="o">=</span><span class="n">PickleType</span><span class="o">.</span><span class="n">pickle</span><span class="p">,</span>
-            <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">data_pickle</span><span class="o">=</span><span class="n">PickleType</span><span class="o">.</span><span class="n">pickle</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            num_workers: Number of local process workers. The default of</span>
@@ -277,7 +278,6 @@
 <span class="sd">                0. pickle</span>
 <span class="sd">                1. cloudpickle</span>
 <span class="sd">                2. dill</span>
-<span class="sd">            loop: The asyncio event loop to run the pool in.</span>
 
 <span class="sd">        ``distex.Pool`` implements the ``concurrent.futures.Executor``</span>
 <span class="sd">        interface and can be used in the place of ProcessPoolExecutor.</span>
@@ -293,7 +293,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_initargs</span> <span class="o">=</span> <span class="n">initargs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_localhost</span> <span class="o">=</span> <span class="n">localhost</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_localport</span> <span class="o">=</span> <span class="n">localport</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span> <span class="o">=</span> <span class="n">loop</span> <span class="ow">or</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">worker_loop</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_func_pickle</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">func_pickle</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_pickle</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_pickle</span><span class="p">)</span>
@@ -301,8 +301,8 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;num_workers must be &gt;= 0&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qsize</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;qsize must be &gt;= 1&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ready</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_worker_added</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ready</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker_added</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;distex.Pool&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">lazy_create</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">is_running</span><span class="p">():</span>
@@ -316,7 +316,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_procs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_total_workers</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span> <span class="o">=</span> <span class="n">SlotPool</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span> <span class="o">=</span> <span class="n">SlotPool</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_called</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -346,33 +346,37 @@
 
         <span class="n">hostSpecs</span> <span class="o">=</span> <span class="p">[</span><span class="n">HostSpec</span><span class="p">(</span><span class="n">host</span><span class="p">)</span> <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hosts</span><span class="p">]</span>
 
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_func_pickle</span><span class="p">,</span>
+            <span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_pickle</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;win32&quot;</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_tcp_server</span><span class="p">()</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_local_processors</span><span class="p">(</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="p">[</span>
                 <span class="s1">&#39;-H&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localhost</span> <span class="ow">or</span> <span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="p">),</span>
-                <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span><span class="p">))</span>
+                <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="p">,</span>
+                <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">is_ssh</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">hostSpecs</span><span class="p">):</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_tcp_server</span><span class="p">()</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_unix_server</span><span class="p">()</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_local_processors</span><span class="p">(</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="p">[</span>
                 <span class="s1">&#39;-u&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unix_path</span><span class="p">,</span>
-                <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span><span class="p">))</span>
+                <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span><span class="p">]</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_local_processors</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 
         <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_add_host</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">hostSpecs</span><span class="p">]</span>
-        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
 
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_workers</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker_added</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
 
-        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>  <span class="c1"># needed for lazy_create</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># needed for lazy_create</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="p">:</span>
             <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">worker</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span>
                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initargs</span><span class="p">,</span> <span class="p">{},</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="p">]</span>
-            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ready</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
@@ -403,23 +407,27 @@
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_remote_processors</span><span class="p">(</span>
                 <span class="n">spec</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">num_workers</span><span class="p">)</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_start_local_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_start_local_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
         <span class="c1"># spawn processors that will connect to our Unix or TCP server</span>
         <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">subprocess_exec</span><span class="p">(</span>
                 <span class="n">asyncio</span><span class="o">.</span><span class="n">SubprocessProtocol</span><span class="p">,</span>
-                <span class="s1">&#39;distex_proc&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="s1">&#39;distex_proc&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">),</span>
                 <span class="n">stdout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_workers</span><span class="p">)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_procs</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_procs</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_total_workers</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_workers</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_start_remote_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">num_workers</span><span class="p">):</span>
         <span class="c1"># connect to remote server and tell how much processors to spawn and</span>
         <span class="c1"># on what port they can find our TCP server</span>
         <span class="n">_reader</span><span class="p">,</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">open_connection</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
-        <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">num_workers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span><span class="p">))</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">num_workers</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_func_pickle</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_pickle</span><span class="p">))</span>
         <span class="k">await</span> <span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
         <span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_total_workers</span> <span class="o">+=</span> <span class="n">num_workers</span>
@@ -430,22 +438,28 @@
         <span class="n">port_arg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span> <span class="k">if</span> <span class="n">port</span> <span class="k">else</span> <span class="p">()</span>
         <span class="n">remote_unix_path</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">get_temp_path</span><span class="p">()</span>
         <span class="n">proc</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span>
-            <span class="s1">&#39;ssh&#39;</span><span class="p">,</span> <span class="s1">&#39;-T&#39;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="o">*</span><span class="n">port_arg</span><span class="p">,</span>
+            <span class="s1">&#39;ssh&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;-T&#39;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">port_arg</span><span class="p">,</span>
             <span class="s1">&#39;-R&#39;</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{remote_unix_path}</span><span class="s1">:</span><span class="si">{self._unix_path}</span><span class="s1">&#39;</span><span class="p">,</span>
             <span class="n">stdin</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
             <span class="n">stderr</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
         <span class="c1"># spawn processors that will connect to the tunneled Unix server</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">f</span><span class="s1">&#39;distex_proc -u </span><span class="si">{remote_unix_path}</span><span class="s1"> -l </span><span class="si">{self._worker_loop}</span><span class="s1"> &#39;</span>
-            <span class="s1">&#39;&amp; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span> <span class="o">*</span> <span class="n">num_workers</span>
+            <span class="n">f</span><span class="s1">&#39;distex_proc &#39;</span>
+            <span class="n">f</span><span class="s1">&#39;-u </span><span class="si">{remote_unix_path}</span><span class="s1"> &#39;</span>
+            <span class="n">f</span><span class="s1">&#39;-l </span><span class="si">{self._worker_loop}</span><span class="s1"> &#39;</span>
+            <span class="n">f</span><span class="s1">&#39;-f </span><span class="si">{self._func_pickle}</span><span class="s1"> &#39;</span>
+            <span class="n">f</span><span class="s1">&#39;-d </span><span class="si">{self._data_pickle}</span><span class="s1"> &#39;</span>
+            <span class="n">f</span><span class="s1">&#39;&amp; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span> <span class="o">*</span> <span class="n">num_workers</span>
         <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
         <span class="k">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_tunnels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proc</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_total_workers</span> <span class="o">+=</span> <span class="n">num_workers</span>
 
     <span class="k">def</span> <span class="nf">_create_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">serializer</span> <span class="o">=</span> <span class="n">Serializer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_func_pickle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_pickle</span><span class="p">)</span>
-        <span class="n">worker</span> <span class="o">=</span> <span class="n">Worker</span><span class="p">(</span><span class="n">serializer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+        <span class="n">serializer</span> <span class="o">=</span> <span class="n">ClientSerializer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_func_pickle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_pickle</span><span class="p">)</span>
+        <span class="n">worker</span> <span class="o">=</span> <span class="n">Worker</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
         <span class="n">worker</span><span class="o">.</span><span class="n">disconnected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_worker_disconnected</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">worker</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qsize</span><span class="p">)</span>
@@ -683,7 +697,7 @@
         <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">worker</span><span class="o">.</span><span class="n">run_task</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="p">]</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">success</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">result</span>
@@ -694,7 +708,7 @@
 <span class="sd">        Let all current tasks finish.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">capacity</span><span class="p">)]</span>
-        <span class="n">slots</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+        <span class="n">slots</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">slots</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span>
 
@@ -798,26 +812,16 @@
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; distex 0.6.0 documentation</title>
+  <title>Introduction &mdash; distex 0.7.0 documentation</title>
   
 
   
@@ -19,33 +19,35 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Distex documentation" href="api.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -59,7 +61,7 @@
             
             
               <div class="version">
-                0.6
+                0.7
               </div>
             
           
@@ -158,7 +160,7 @@
 </li>
 </ul>
 </div>
-<p><a class="reference external" href="https://travis-ci.org/erdewit/distex"><img alt="Build" src="https://travis-ci.org/erdewit/distex.svg?branch=master" /></a> <img alt="" src="https://img.shields.io/badge/python-3.6+-blue.svg" /> <img alt="" src="https://img.shields.io/badge/status-beta-green.svg" /> <a class="reference external" href="https://pypi.python.org/pypi/distex"><img alt="PyPi" src="https://img.shields.io/pypi/v/distex.svg" /></a> <img alt="" src="https://img.shields.io/badge/license-BSD-blue.svg" /> <a class="reference external" href="http://rawgit.com/erdewit/distex/master/docs/html/api.html"><img alt="Documentation" src="https://img.shields.io/badge/docs-distex-brightgreen.svg" /></a></p>
+<p><a class="reference external" href="https://travis-ci.org/erdewit/distex"><img alt="Build" src="https://travis-ci.org/erdewit/distex.svg?branch=master" /></a> <img alt="" src="https://img.shields.io/badge/python-3.6+-blue.svg" /> <img alt="" src="https://img.shields.io/badge/status-beta-green.svg" /> <a class="reference external" href="https://pypi.python.org/pypi/distex"><img alt="PyPi" src="https://img.shields.io/pypi/v/distex.svg" /></a> <img alt="" src="https://img.shields.io/badge/license-BSD-blue.svg" /> <a class="reference external" href="https://distex.readthedocs.io/"><img alt="Documentation" src="https://readthedocs.org/projects/distex/badge/?version=latest" /></a></p>
 <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
 <p>Distex offers a distributed process pool to utilize multiple CPUs or machines.
@@ -167,14 +169,14 @@ It uses
 to efficiently manage the worker processes.</p>
 <p>Features:</p>
 <ul class="simple">
-<li>Scales from 1 to 1000’s of processors;</li>
-<li>Can handle in the order of 50.000 small tasks per second;</li>
-<li>Easy to use with SSH (secure shell) hosts;</li>
-<li>Full async support;</li>
-<li>Maps over unbounded iterables;</li>
-<li>Compatible with
+<li><p>Scales from 1 to 1000’s of processors;</p></li>
+<li><p>Can handle in the order of 50.000 small tasks per second;</p></li>
+<li><p>Easy to use with SSH (secure shell) hosts;</p></li>
+<li><p>Full async support;</p></li>
+<li><p>Maps over unbounded iterables;</p></li>
+<li><p>Compatible with
 <a class="reference external" href="https://docs.python.org/3/library/concurrent.futures.html">concurrent.futures.ProcessPool</a>
-(or <a class="reference external" href="https://www.python.org/dev/peps/pep-3148">PEP3148</a>).</li>
+(or <a class="reference external" href="https://www.python.org/dev/peps/pep-3148">PEP3148</a>).</p></li>
 </ul>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
@@ -190,9 +192,9 @@ no support for passwords. The remote installation  can be tested with:</p>
 </div>
 <p>Dependencies:</p>
 <ul class="simple">
-<li><a class="reference external" href="http://www.python.org">Python</a> version 3.6 or higher;</li>
-<li>On Unix the <code class="docutils literal notranslate"><span class="pre">uvloop</span></code> package is recommended: <code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">uvloop</span></code></li>
-<li>SSH client and server (optional).</li>
+<li><p><a class="reference external" href="http://www.python.org">Python</a> version 3.6 or higher;</p></li>
+<li><p>On Unix the <code class="docutils literal notranslate"><span class="pre">uvloop</span></code> package is recommended: <code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">uvloop</span></code></p></li>
+<li><p>SSH client and server (optional).</p></li>
 </ul>
 </div>
 <div class="section" id="examples">
@@ -286,14 +288,11 @@ it to the <code class="docutils literal notranslate"><span class="pre">ssh</span
 <div class="section" id="documentation">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://rawgit.com/erdewit/distex/master/docs/html/api.html">Distex documentation</a></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Ewald de Wit &lt;<a class="reference external" href="mailto:ewald&#46;de&#46;wit&#37;&#52;&#48;gmail&#46;com">ewald<span>&#46;</span>de<span>&#46;</span>wit<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">author</dt>
+<dd class="field-odd"><p>Ewald de Wit &lt;<a class="reference external" href="mailto:ewald&#46;de&#46;wit&#37;&#52;&#48;gmail&#46;com">ewald<span>&#46;</span>de<span>&#46;</span>wit<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
+</dd>
+</dl>
 </div>
 </div>
 
@@ -332,26 +331,16 @@ it to the <code class="docutils literal notranslate"><span class="pre">ssh</span
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
