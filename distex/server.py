@@ -31,7 +31,7 @@ class Server:
         peername = f'{req_host}:{req_port}'
         self._logger.info(f'Connection from {peername}')
         data = await reader.readline()
-        nw, port, worker_loop = data.split()
+        nw, port, worker_loop, func_pickle, data_pickle = data.split()
         num_workers = int(nw) or os.cpu_count()
         self._logger.info(
             f'Starting up {num_workers} processors for {peername}')
@@ -40,7 +40,11 @@ class Server:
         asyncio.gather(
             *[asyncio.create_subprocess_exec(
                 'distex_proc',
-                '-H', req_host, '-p', port, '-l', worker_loop,
+                '-H', req_host,
+                '-p', port,
+                '-l', worker_loop,
+                '-f', func_pickle,
+                '-d', data_pickle,
                 stdout=None, stderr=None)
                 for _ in range(num_workers)])
 

@@ -14,7 +14,7 @@ class Processor(asyncio.Protocol):
     """
     Single process that works on tasks.
     """
-    def __init__(self, host, port, unix_path):
+    def __init__(self, host, port, unix_path, func_pickle, data_pickle):
         self._host = host
         self._port = port
         self._unix_path = unix_path
@@ -22,7 +22,7 @@ class Processor(asyncio.Protocol):
         self._data_q = asyncio.Queue()
         self._transport = None
         self._last_func = None
-        self._serializer = ServerSerializer()
+        self._serializer = ServerSerializer(func_pickle, data_pickle)
         self._worker_task = self._loop.create_task(self.worker())
         self._logger = logging.getLogger('distex.Processor')
         self._loop.run_until_complete(self.create())
@@ -101,6 +101,12 @@ def main():
     parser.add_argument(
         '--loop', '-l', dest='loop', default=0, type=int,
         help='0=default 1=asyncio 2=uvloop 3=proactor 4=quamash')
+    parser.add_argument(
+        '--func_pickle', '-f', dest='func_pickle', default=1, type=int,
+        help='0=pickle 1=cloudpickle 2=dill')
+    parser.add_argument(
+        '--data_pickle', '-d', dest='data_pickle', default=0, type=int,
+        help='0=pickle 1=cloudpickle 2=dill')
     args = parser.parse_args()
     if not args.port and not args.unix_path:
         print('distex installed OK')
@@ -122,7 +128,8 @@ def main():
         loop = quamash.QEventLoop()
     asyncio.set_event_loop(loop)
     processor = Processor(  # noqa
-        args.host, args.port, args.unix_path)
+        args.host, args.port, args.unix_path,
+        args.func_pickle, args.data_pickle)
     loop.run_forever()
 
 

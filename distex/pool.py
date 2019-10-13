@@ -195,19 +195,23 @@ class Pool:
 
         hostSpecs = [HostSpec(host) for host in self._hosts]
 
+        args = [
+            '-f', self._func_pickle,
+            '-d', self._data_pickle]
         if sys.platform == "win32":
             await self._start_tcp_server()
-            await self._start_local_processors(
+            args += [
                 '-H', self._localhost or '127.0.0.1',
-                '-p', str(self._localport),
-                '-l', str(self._worker_loop))
+                '-p', self._localport,
+                '-l', self._worker_loop]
         else:
             if not all(spec.is_ssh for spec in hostSpecs):
                 await self._start_tcp_server()
             await self._start_unix_server()
-            await self._start_local_processors(
+            args += [
                 '-u', self._unix_path,
-                '-l', str(self._worker_loop))
+                '-l', self._worker_loop]
+        await self._start_local_processors(args)
 
         tasks = [self._add_host(spec) for spec in hostSpecs]
         await asyncio.gather(*tasks)
@@ -252,12 +256,12 @@ class Pool:
             await self._start_remote_processors(
                 spec.host, spec.port, spec.num_workers)
 
-    async def _start_local_processors(self, *args):
+    async def _start_local_processors(self, args):
         # spawn processors that will connect to our Unix or TCP server
         tasks = [
             self._loop.subprocess_exec(
                 asyncio.SubprocessProtocol,
-                'distex_proc', *args,
+                'distex_proc', *(str(arg) for arg in args),
                 stdout=None, stderr=None)
             for _ in range(self._num_workers)]
         self._procs = await asyncio.gather(*tasks)
@@ -267,8 +271,12 @@ class Pool:
         # connect to remote server and tell how much processors to spawn and
         # on what port they can find our TCP server
         _reader, writer = await asyncio.open_connection(host, port)
-        writer.write(b'%d %d %d\n' % (
-            num_workers, self._localport, self._worker_loop))
+        writer.write(b'%d %d %d %d %d\n' % (
+            num_workers,
+            self._localport,
+            self._worker_loop,
+            self._func_pickle,
+            self._data_pickle))
         await writer.drain()
         writer.close()
         self._total_workers += num_workers
@@ -279,21 +287,27 @@ class Pool:
         port_arg = ('-p', port) if port else ()
         remote_unix_path = util.get_temp_path()
         proc = await asyncio.create_subprocess_exec(
-            'ssh', '-T', host, *port_arg,
+            'ssh',
+            '-T', host,
+            *port_arg,
             '-R', f'{remote_unix_path}:{self._unix_path}',
             stdin=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE)
         # spawn processors that will connect to the tunneled Unix server
         cmd = (
-            f'distex_proc -u {remote_unix_path} -l {self._worker_loop} '
-            '& \n'.encode()) * num_workers
+            f'distex_proc '
+            f'-u {remote_unix_path} '
+            f'-l {self._worker_loop} '
+            f'-f {self._func_pickle} '
+            f'-d {self._data_pickle} '
+            f'& \n'.encode()) * num_workers
         proc.stdin.write(cmd)
         await proc.stdin.drain()
         self._ssh_tunnels.append(proc)
         self._total_workers += num_workers
 
     def _create_worker(self):
-        serializer = ClientSerializer(self._data_pickle, self._func_pickle)
+        serializer = ClientSerializer(self._func_pickle, self._data_pickle)
         worker = Worker(serializer)
         worker.disconnected = self._on_worker_disconnected
         self._workers.append(worker)

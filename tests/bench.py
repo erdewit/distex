@@ -44,7 +44,7 @@ def main():
     async def map_async():
         async for result in pool.map_async(
                 g, range(REPS), star=False,
-                chunksize=1, ordered=True, timeout=None):
+                chunksize=16, ordered=True, timeout=None):
             pass
 #             print(result)
         print(result)
@@ -52,7 +52,7 @@ def main():
 #     pool = Pool(0, ['ssh://cup/4'], qsize=2)
 #     pool = Pool(0, ['maxi/4'], qsize=2)
 #     pool = Pool(4, ['localhost:10000/2', 'localhost:10001/4'])
-    pool = Pool(qsize=2)
+    pool = Pool(qsize=4)
 #     pool = Pool(4, ['ssh://maxi/2'], qsize=2)
     # pool = Pool(4, ['localhost:8899/4'], qsize=4)
     if 1:
