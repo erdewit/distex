@@ -4,10 +4,11 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
-  - "nightly"
+  - "3.9"
+#  - "nightly"
 env:
   - LOOP=asyncio
-  # - LOOP=uvloop
+  - LOOP=uvloop
 install:
   - if [[ "$LOOP" != "asyncio" ]]; then pip install $LOOP; fi;
   - pip install .
