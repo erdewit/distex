@@ -14,6 +14,16 @@ class Server:
     Use only in a trusted network environment.
     """
     def __init__(self, host='0.0.0.0', port=util.DEFAULT_PORT):
+        """
+        Initialize the server.
+
+        Args:
+            self: (todo): write your description
+            host: (str): write your description
+            port: (int): write your description
+            util: (todo): write your description
+            DEFAULT_PORT: (str): write your description
+        """
         self._host = host
         self._port = port
         self._loop = asyncio.get_event_loop()
@@ -22,11 +32,25 @@ class Server:
         self._loop.run_until_complete(self.create())
 
     async def create(self):
+          """
+          Create an http server.
+
+          Args:
+              self: (int): write your description
+          """
         self._server = await asyncio.start_server(
             self.handle_request, self._host, self._port)
         self._logger.info(f'Serving on port {self._port}')
 
     async def handle_request(self, reader, writer):
+          """
+          Handle a request.
+
+          Args:
+              self: (todo): write your description
+              reader: (todo): write your description
+              writer: (todo): write your description
+          """
         req_host, req_port = writer.get_extra_info('peername')
         peername = f'{req_host}:{req_port}'
         self._logger.info(f'Connection from {peername}')
@@ -51,10 +75,22 @@ class Server:
         writer.close()
 
     def stop(self):
+        """
+        Stop the socket.
+
+        Args:
+            self: (todo): write your description
+        """
         self._server.close()
         self._logger.info(f'Stopped serving from {self._port}')
 
     def run(self):
+        """
+        Starts the server.
+
+        Args:
+            self: (todo): write your description
+        """
         try:
             self._loop.run_forever()
         except KeyboardInterrupt:

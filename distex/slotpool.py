@@ -11,6 +11,12 @@ class SlotPool:
         '_loop', '_get_waiters', '_slot_ready_waiter')
 
     def __init__(self):
+        """
+        Initialize the queue.
+
+        Args:
+            self: (todo): write your description
+        """
         self.num_free = 0
         self.capacity = 0
         self._slots = deque()
@@ -32,6 +38,12 @@ class SlotPool:
         self._wake_up_next()
 
     def _wake_up_next(self):
+        """
+        Waits for the next waiters.
+
+        Args:
+            self: (todo): write your description
+        """
         while self._get_waiters:
             waiter = self._get_waiters.popleft()
             if not waiter.done():

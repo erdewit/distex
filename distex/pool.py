@@ -158,6 +158,12 @@ class Pool:
             self._loop.run_until_complete(self.create())
 
     def _reset(self):
+        """
+        Reset the socket.
+
+        Args:
+            self: (todo): write your description
+        """
         self._tcp_server = None
         self._unix_server = None
         self._unix_path = ''
@@ -169,19 +175,51 @@ class Pool:
         self._create_called = False
 
     def __enter__(self):
+        """
+        Decor function.
+
+        Args:
+            self: (todo): write your description
+        """
         return self
 
     def __exit__(self, *_excinfo):
+        """
+        Calls the given callable.
+
+        Args:
+            self: (todo): write your description
+            _excinfo: (todo): write your description
+        """
         self.shutdown()
 
     async def __aenter__(self):
+          """
+          Create a new asynchronously.
+
+          Args:
+              self: (todo): write your description
+          """
         await self.create()
         return self
 
     async def __aexit__(self, *_excinfo):
+          """
+          Shutdown the given exception.
+
+          Args:
+              self: (todo): write your description
+              _excinfo: (todo): write your description
+          """
         await self.shutdown_async()
 
     def __await__(self):
+        """
+        Create a new record.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.create().__await__()
 
     async def create(self):
@@ -230,6 +268,12 @@ class Pool:
         return self
 
     async def _start_unix_server(self):
+          """
+          Start the unix server.
+
+          Args:
+              self: (todo): write your description
+          """
         # start server that listens on a Unix socket
         self._unix_path = util.get_temp_path()
         self._unix_server = await self._loop.create_unix_server(
@@ -238,6 +282,12 @@ class Pool:
         self._logger.info('Started serving on Unix socket %s', self._unix_path)
 
     async def _start_tcp_server(self):
+          """
+          Start the tcp tcp server.
+
+          Args:
+              self: (todo): write your description
+          """
         # start server that listens on a TCP port
         localhost = self._localhost or (
             '0.0.0.0' if self._hosts else '127.0.0.1')
@@ -249,6 +299,13 @@ class Pool:
         self._logger.info(f'Started serving on port {self._localport}')
 
     async def _add_host(self, spec):
+          """
+          Add a host to the pool.
+
+          Args:
+              self: (todo): write your description
+              spec: (todo): write your description
+          """
         if spec.is_ssh:
             await self._start_remote_processors_ssh(
                 spec.host, spec.port, spec.num_workers)
@@ -257,6 +314,12 @@ class Pool:
                 spec.host, spec.port, spec.num_workers)
 
     async def _start_local_processors(self, args):
+          """
+          Starts local processes.
+
+          Args:
+              self: (todo): write your description
+          """
         # spawn processors that will connect to our Unix or TCP server
         tasks = [
             self._loop.subprocess_exec(
@@ -268,6 +331,15 @@ class Pool:
         self._total_workers += self._num_workers
 
     async def _start_remote_processors(self, host, port, num_workers):
+          """
+          Start the worker processes.
+
+          Args:
+              self: (todo): write your description
+              host: (str): write your description
+              port: (int): write your description
+              num_workers: (int): write your description
+          """
         # connect to remote server and tell how much processors to spawn and
         # on what port they can find our TCP server
         _reader, writer = await asyncio.open_connection(host, port)
@@ -282,6 +354,15 @@ class Pool:
         self._total_workers += num_workers
 
     async def _start_remote_processors_ssh(self, host, port, num_workers):
+          """
+          Starts a new ssh process.
+
+          Args:
+              self: (todo): write your description
+              host: (str): write your description
+              port: (int): write your description
+              num_workers: (int): write your description
+          """
         # establish a reverse SSH tunnel from remote unix socket to
         # the local unix socket that our Unix server is listening on
         port_arg = ('-p', port) if port else ()
@@ -307,6 +388,12 @@ class Pool:
         self._total_workers += num_workers
 
     def _create_worker(self):
+        """
+        Create a new worker.
+
+        Args:
+            self: (todo): write your description
+        """
         serializer = ClientSerializer(self._func_pickle, self._data_pickle)
         worker = Worker(serializer)
         worker.disconnected = self._on_worker_disconnected
@@ -317,6 +404,13 @@ class Pool:
         return worker
 
     def _on_worker_disconnected(self, worker):
+        """
+        On the given worker.
+
+        Args:
+            self: (todo): write your description
+            worker: (todo): write your description
+        """
         pass
 
     def is_ready(self) -> bool:
@@ -345,6 +439,12 @@ class Pool:
         task = self._loop.create_task(self.run_async(func, *args, **kwargs))
 
         def on_task_done(task):
+            """
+            Set the result of a task to complete.
+
+            Args:
+                task: (todo): write your description
+            """
             if task.exception():
                 future.set_exception(task.exception())
             else:
@@ -420,6 +520,18 @@ class Pool:
                     yield r
 
     async def _map(self, func, iterables, timeout, chunksize, ordered, star):
+          """
+          Map a function over a list.
+
+          Args:
+              self: (todo): write your description
+              func: (todo): write your description
+              iterables: (todo): write your description
+              timeout: (float): write your description
+              chunksize: (int): write your description
+              ordered: (bool): write your description
+              star: (todo): write your description
+          """
         if not self._create_called:
             await self.create()
         await self.ready.wait()
@@ -491,6 +603,13 @@ class Pool:
             raise self.TimeoutError()
 
     async def _run_task(self, task):
+          """
+          Run the given async task.
+
+          Args:
+              self: (todo): write your description
+              task: (todo): write your description
+          """
         worker = await self._slots.get()
         try:
             success, result = await worker.run_task(task)
@@ -572,6 +691,13 @@ class Pool:
             self._loop.run_until_complete(coro)
 
     async def shutdown_async(self, wait=True):
+          """
+          Shutdown all workers.
+
+          Args:
+              self: (todo): write your description
+              wait: (bool): write your description
+          """
         if not self._total_workers:
             return
         if wait:
@@ -595,19 +721,46 @@ class RemoteException(Exception):
     """
 
     def __init__(self, exc, tb=None):
+        """
+        Initialize the exception.
+
+        Args:
+            self: (todo): write your description
+            exc: (todo): write your description
+            tb: (int): write your description
+        """
         self.exc = exc
         tb = tb or traceback.format_exception(
             type(exc), exc, exc.__traceback__)
         self.tb = ''.join(tb)
 
     def __str__(self):
+        """
+        Returns the string : class
+
+        Args:
+            self: (todo): write your description
+        """
         return self.tb
 
     def __reduce__(self):
+        """
+        Reduce the exception.
+
+        Args:
+            self: (todo): write your description
+        """
         return RemoteException._unpickle, (self.exc, self.tb)
 
     @staticmethod
     def _unpickle(exc, tb):
+        """
+        Unpickle a python object ).
+
+        Args:
+            exc: (todo): write your description
+            tb: (todo): write your description
+        """
         exc.__cause__ = RemoteException(None, tb)
         return exc
 

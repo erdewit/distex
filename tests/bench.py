@@ -24,6 +24,12 @@ REPS = 100000
 
 
 def f(x):
+    """
+    Return a function that returns a function f ( x ) of x.
+
+    Args:
+        x: (int): write your description
+    """
     import math
     for _ in range(10000):
         x += math.sin(x)
@@ -31,17 +37,38 @@ def f(x):
 
 
 def g(x):
+    """
+    Returns the dot product of x.
+
+    Args:
+        x: (int): write your description
+    """
     return x + 2
 
 
 def main():
+    """
+    The main function.
+
+    Args:
+    """
 
     async def run():
+          """
+          Run a list of futures.
+
+          Args:
+          """
         result = await asyncio.gather(
             *[pool.run_async(g, i) for i in range(REPS)])
         print(result)
 
     async def map_async():
+          """
+          Asynchronously map. map.
+
+          Args:
+          """
         async for result in pool.map_async(
                 g, range(REPS), star=False,
                 chunksize=16, ordered=True, timeout=None):

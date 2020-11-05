@@ -33,6 +33,14 @@ class ClientSerializer:
     Func_cache = [None, None]
 
     def __init__(self, func_pickle, data_pickle):
+        """
+        Initialize the pickle.
+
+        Args:
+            self: (todo): write your description
+            func_pickle: (todo): write your description
+            data_pickle: (str): write your description
+        """
         self.func_pickle = func_pickle
         self.data_pickle = data_pickle
         self.data_dumps = PICKLE_MODULES[data_pickle].dumps
@@ -42,9 +50,24 @@ class ClientSerializer:
         self.data = bytearray()
 
     def add_data(self, data):
+        """
+        Add data to this method
+
+        Args:
+            self: (todo): write your description
+            data: (array): write your description
+        """
         self.data.extend(data)
 
     def write_request(self, write, task):
+        """
+        Writes a request.
+
+        Args:
+            self: (todo): write your description
+            write: (bool): write your description
+            task: (str): write your description
+        """
         func, args, kwargs, no_star, do_map = task
         if func is self.last_func:
             f = b''
@@ -104,6 +127,14 @@ class ServerSerializer:
     __slots__ = ('data', 'func_loads', 'data_loads', 'data_dumps', 'last_func')
 
     def __init__(self, func_pickle, data_pickle):
+        """
+        Initialize the pickle.
+
+        Args:
+            self: (todo): write your description
+            func_pickle: (todo): write your description
+            data_pickle: (str): write your description
+        """
         self.func_loads = PICKLE_MODULES[func_pickle].loads
         self.data_loads = PICKLE_MODULES[data_pickle].loads
         self.data_dumps = PICKLE_MODULES[data_pickle].dumps
@@ -111,6 +142,13 @@ class ServerSerializer:
         self.data = bytearray()
 
     def add_data(self, data):
+        """
+        Add data to this method
+
+        Args:
+            self: (todo): write your description
+            data: (array): write your description
+        """
         self.data.extend(data)
 
     def get_request(self):
@@ -144,6 +182,15 @@ class ServerSerializer:
         return func, args, kwargs, no_star, do_map
 
     def write_response(self, write, success, result):
+        """
+        Writes a response to the client.
+
+        Args:
+            self: (todo): write your description
+            write: (bool): write your description
+            success: (str): write your description
+            result: (todo): write your description
+        """
         if result is None:
             s = b''
         else:

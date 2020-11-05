@@ -15,6 +15,17 @@ class Processor(asyncio.Protocol):
     Single process that works on tasks.
     """
     def __init__(self, host, port, unix_path, func_pickle, data_pickle):
+        """
+        Initialize the connection.
+
+        Args:
+            self: (todo): write your description
+            host: (str): write your description
+            port: (int): write your description
+            unix_path: (str): write your description
+            func_pickle: (todo): write your description
+            data_pickle: (str): write your description
+        """
         self._host = host
         self._port = port
         self._unix_path = unix_path
@@ -28,6 +39,12 @@ class Processor(asyncio.Protocol):
         self._loop.run_until_complete(self.create())
 
     async def create(self):
+          """
+          Create a connection.
+
+          Args:
+              self: (int): write your description
+          """
         if self._unix_path:
             self._transport, _ = await self._loop.create_unix_connection(
                 lambda: self, self._unix_path)
@@ -36,6 +53,12 @@ class Processor(asyncio.Protocol):
                 lambda: self, self._host, self._port)
 
     async def worker(self):
+          """
+          The async task.
+
+          Args:
+              self: (todo): write your description
+          """
         while True:
             data = await self._data_q.get()
             self._serializer.add_data(data)
@@ -69,25 +92,57 @@ class Processor(asyncio.Protocol):
                 del result
 
     def peername(self):
+        """
+        Return the peername of the file.
+
+        Args:
+            self: (todo): write your description
+        """
         if self._unix_path:
             return f'{self._unix_path}'
         else:
             return f'{self._host}:{self._port}'
 
     def connection_made(self, _transport):
+        """
+        Called when the transport is closed.
+
+        Args:
+            self: (todo): write your description
+            _transport: (todo): write your description
+        """
         self._logger.info(f'Connected to {self.peername()}')
 
     def connection_lost(self, exc):
+        """
+        Called when the connection is closed.
+
+        Args:
+            self: (todo): write your description
+            exc: (str): write your description
+        """
         self._loop.stop()
         if exc:
             self._logger.error(
                 f'Connection lost from {self.peername()}: {exc}')
 
     def data_received(self, data):
+        """
+        Add data to the queue.
+
+        Args:
+            self: (todo): write your description
+            data: (todo): write your description
+        """
         self._data_q.put_nowait(data)
 
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     parser = argparse.ArgumentParser(
         description='Run a single task processor',
         formatter_class=argparse.RawTextHelpFormatter)
