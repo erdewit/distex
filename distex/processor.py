@@ -78,6 +78,7 @@ class Processor(asyncio.Protocol):
         self._logger.info(f'Connected to {self.peername()}')
 
     def connection_lost(self, exc):
+        self._worker_task.cancel()
         self._loop.stop()
         if exc:
             self._logger.error(
