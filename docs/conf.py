@@ -9,10 +9,10 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'distex'
-copyright = '2019, Ewald de Wit'
+copyright = '2020, Ewald de Wit'
 author = 'Ewald de Wit'
 
-__version__ = None
+__version__ = ''
 exec(open('../distex/version.py').read())
 version = '.'.join(__version__.split('.')[:2])
 release = __version__
