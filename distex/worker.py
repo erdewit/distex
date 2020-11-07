@@ -33,10 +33,10 @@ class Worker:
         """
         Send the task to the processor and return Future for the result.
         """
+        self.serializer.write_request(self.transport.write, task)
         future = self.loop.create_future()
         self.futures.append(future)
         self.tasks.append(task)
-        self.serializer.write_request(self.transport.write, task)
         return future
 
     def stop(self):
