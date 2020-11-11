@@ -1,11 +1,11 @@
-import asyncio
 import argparse
+import asyncio
 import logging
 import signal
 
+from distex import util
 from distex.pool import LoopType, RemoteException
 from distex.serializer import ServerSerializer
-from distex import util
 
 signal.signal(signal.SIGINT, signal.SIG_IGN)
 
@@ -14,6 +14,7 @@ class Processor(asyncio.Protocol):
     """
     Single process that works on tasks.
     """
+
     def __init__(self, host, port, unix_path, func_pickle, data_pickle):
         self._host = host
         self._port = port

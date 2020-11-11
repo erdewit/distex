@@ -19,6 +19,7 @@ class PoolMap(Op):
             * ``True``: The order of results preserves the source order.
             * ``False``: Results are in order of completion.
     """
+
     __slots__ = ('_pool', '_func', '_task', '_kwargs')
 
     def __init__(

@@ -6,6 +6,7 @@ class SlotPool:
     """
     Pool that manages a limited number of contendable resource slots.
     """
+
     __slots__ = (
         'num_free', 'capacity', '_slots',
         '_loop', '_get_waiters', '_slot_ready_waiter')
@@ -19,9 +20,7 @@ class SlotPool:
         self._slot_ready_waiter = None
 
     def extend(self, slots):
-        """
-        Add new slots to the pool.
-        """
+        """Add new slots to the pool."""
         if not slots:
             return
         slots_length = len(slots)
@@ -39,9 +38,7 @@ class SlotPool:
                 return
 
     async def get(self):
-        """
-        Await a free slot from the pool.
-        """
+        """Await a free slot from the pool."""
         while not self._slots:
             fut = self._loop.create_future()
             self._get_waiters.append(fut)
@@ -56,9 +53,7 @@ class SlotPool:
         return self._slots.popleft()
 
     def put(self, slot, front=True):
-        """
-        Put the slot back in the pool again.
-        """
+        """Put the slot back in the pool again."""
         self.num_free += 1
         if front:
             self._slots.appendleft(slot)
@@ -70,9 +65,7 @@ class SlotPool:
             self._slot_ready_waiter = None
 
     def slot_ready(self):
-        """
-        Awaitable signal when a slot has been put back with ``put``.
-        """
+        """Awaitable signal when a slot has been put back with ``put``."""
         if self._slot_ready_waiter is None:
             self._slot_ready_waiter = self._loop.create_future()
         return self._slot_ready_waiter

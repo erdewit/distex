@@ -1,9 +1,9 @@
-import sys
 import asyncio
-import socket
-import logging
-import uuid
 import itertools
+import logging
+import socket
+import sys
+import uuid
 from contextlib import suppress
 
 DEFAULT_PORT = 8899

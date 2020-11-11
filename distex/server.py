@@ -1,7 +1,7 @@
-import os
+import argparse
 import asyncio
 import logging
-import argparse
+import os
 
 from . import util
 
@@ -13,6 +13,7 @@ class Server:
 
     Use only in a trusted network environment.
     """
+
     def __init__(self, host='0.0.0.0', port=util.DEFAULT_PORT):
         self._host = host
         self._port = port
@@ -37,8 +38,8 @@ class Server:
             f'Starting up {num_workers} processors for {peername}')
 
         # start processors that will connect back to the remote server
-        asyncio.gather(
-            *[asyncio.create_subprocess_exec(
+        for _ in range(num_workers):
+            task = asyncio.create_subprocess_exec(
                 'distex_proc',
                 '-H', req_host,
                 '-p', port,
@@ -46,7 +47,7 @@ class Server:
                 '-f', func_pickle,
                 '-d', data_pickle,
                 stdout=None, stderr=None)
-                for _ in range(num_workers)])
+            asyncio.ensure_future(task)
 
         writer.close()
 

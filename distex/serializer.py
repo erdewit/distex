@@ -1,8 +1,11 @@
-import struct
+"""Serialization of tasks and data."""
+
 import pickle
-import dill
-import cloudpickle
+import struct
 from enum import IntEnum
+
+import cloudpickle
+import dill
 
 REQ_HEADER_FMT = '!IQIBB'
 REQ_HEADER_SIZE = struct.calcsize(REQ_HEADER_FMT)
@@ -22,9 +25,7 @@ class PickleType(IntEnum):
 
 
 class ClientSerializer:
-    """
-    Client-side serialization of requests and responses.
-    """
+    """Client-side serialization of requests and responses."""
 
     __slots__ = (
         'data', 'func_pickle', 'data_pickle',
@@ -71,9 +72,7 @@ class ClientSerializer:
         del ar, kw
 
     def get_responses(self):
-        """
-        Yield (success, result) tuples as long as there is data.
-        """
+        """Yield (success, result) tuples as long as there is data."""
         data = self.data
         while data:
             sz = len(data)
@@ -97,9 +96,7 @@ class ClientSerializer:
 
 
 class ServerSerializer:
-    """
-    Server-side serialization of requests and responses.
-    """
+    """Server-side serialization of requests and responses."""
 
     __slots__ = ('data', 'func_loads', 'data_loads', 'data_dumps', 'last_func')
 
@@ -114,9 +111,7 @@ class ServerSerializer:
         self.data.extend(data)
 
     def get_request(self):
-        """
-        Return the next request, or None is there is none.
-        """
+        """Return the next request, or None is there is none"""
         data = self.data
         sz = len(data)
         if sz < REQ_HEADER_SIZE:

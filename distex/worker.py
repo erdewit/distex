@@ -1,3 +1,5 @@
+"""Proxy for a remote worker process."""
+
 import asyncio
 import logging
 from collections import deque
@@ -5,23 +7,17 @@ from collections import deque
 _logger = logging.getLogger('distex.Worker')
 
 
-class Worker:
+class Worker(asyncio.Protocol):
     """
     Worker that submits tasks to and gets results from a
     local or remote processor.
-
-    Implements asyncio.Protocol.
     """
-
-    __slots__ = (
-        'futures', 'tasks', 'loop', 'disconnected',
-        'peername', 'serializer', 'transport')
 
     def __init__(self, serializer):
         self.serializer = serializer
         self.loop = asyncio.get_event_loop()
         self.transport = None
-        self.peername = None
+        self.peername = ''
         self.disconnected = None
         self.futures = deque()
         self.tasks = deque()
@@ -30,9 +26,7 @@ class Worker:
         return f'<Worker {self.peername}>'
 
     def run_task(self, task):
-        """
-        Send the task to the processor and return Future for the result.
-        """
+        """Send the task to the processor and return Future for the result."""
         self.serializer.write_request(self.transport.write, task)
         future = self.loop.create_future()
         self.futures.append(future)
@@ -40,9 +34,7 @@ class Worker:
         return future
 
     def stop(self):
-        """
-        Close connection to the processor.
-        """
+        """Close connection to the processor."""
         if self.transport:
             self.transport.close()
             self.transport = None

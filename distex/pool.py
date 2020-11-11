@@ -1,18 +1,20 @@
+"""Execute tasks in a pool of local or remote worker processes."""
+
+import asyncio
+import concurrent.futures
+import logging
 import os
 import sys
-import asyncio
-import logging
 import traceback
-import concurrent.futures
-import collections.abc
-from enum import IntEnum
 from collections import deque
 from contextlib import suppress
+from enum import IntEnum
+from typing import Iterable, Optional
 
-from .worker import Worker
-from .slotpool import SlotPool
-from .serializer import ClientSerializer, PickleType
 from . import util
+from .serializer import ClientSerializer, PickleType
+from .slotpool import SlotPool
+from .worker import Worker
 
 
 class LoopType(IntEnum):
@@ -80,21 +82,21 @@ class Pool:
 
     def __init__(
             self,
-            num_workers: int = None,
+            num_workers: int = 0,
             hosts=None,
             qsize: int = 2,
             initializer=None,
             initargs: tuple = (),
-            localhost: str = None,
-            localport: int = None,
+            localhost: str = '',
+            localport: int = 0,
             lazy_create: bool = False,
-            worker_loop=LoopType.default,
-            func_pickle=PickleType.dill,
-            data_pickle=PickleType.pickle):
+            worker_loop: int = LoopType.default,
+            func_pickle: int = PickleType.dill,
+            data_pickle: int = PickleType.pickle):
         """
         Args:
             num_workers: Number of local process workers. The default of
-              None will use the number of CPUs.
+              0 will use the number of CPUs.
             hosts: List of remote host specification strings in the format
               ``[ssh://][username@]hostname[:portnumber]/num_workers``.
 
@@ -134,8 +136,7 @@ class Pool:
         .. _ssh-keygen: https://linux.die.net/man/1/ssh-keygen
         .. _ssh-copy-id: https://linux.die.net/man/1/ssh-copy-id
         """
-        self._num_workers = num_workers if num_workers is not None \
-            else os.cpu_count()
+        self._num_workers = num_workers or os.cpu_count() or 1
         self._hosts = [hosts] if type(hosts) is str else hosts if hosts else []
         self._qsize = qsize
         self._initializer = initializer
@@ -328,9 +329,7 @@ class Pool:
         return self.ready.is_set()
 
     def total_workers(self) -> int:
-        """
-        Total number of workers in the pool.
-        """
+        """Total number of workers in the pool."""
         return self._total_workers
 
     def submit(self, func, *args, **kwargs):
@@ -344,23 +343,23 @@ class Pool:
         future = concurrent.futures.Future()
         task = self._loop.create_task(self.run_async(func, *args, **kwargs))
 
-        def on_task_done(task):
-            if task.exception():
-                future.set_exception(task.exception())
+        def on_task_done(task_):
+            if task_.exception():
+                future.set_exception(task_.exception())
             else:
-                future.set_result(task.result())
+                future.set_result(task_.result())
 
         task.add_done_callback(on_task_done)
         return future
 
-    def map(self, func, *iterables,
-            timeout=None, chunksize=1, ordered=True, star=False):
+    def map(
+            self, func, *iterables, timeout: Optional[float] = None,
+            chunksize: int = 1, ordered: bool = True, star: bool = False):
         """
         Map the function onto the given iterable(s) and
         return an iterator that yields the results.
 
         Args:
-
             func: Function to map. If it returns an awaitable then the
               result is awaited and returned.
             iterables: Sync or async iterables (in any combination)
@@ -430,8 +429,7 @@ class Pool:
         run_task = self._run_task
         input_consumed = False
         do_map = chunksize > 1
-        is_sync = all(
-            isinstance(it, collections.abc.Iterable) for it in iterables)
+        is_sync = all(isinstance(it, Iterable) for it in iterables)
 
         if is_sync:
             if len(iterables) > 1:
@@ -495,7 +493,7 @@ class Pool:
         try:
             success, result = await worker.run_task(task)
         finally:
-            self._slots.put(worker, not(worker.tasks))
+            self._slots.put(worker, not worker.tasks)
         if success:
             return result
         raise result
@@ -613,9 +611,8 @@ class RemoteException(Exception):
 
 
 class HostSpec:
-    """
-    Remote host specification.
-    """
+    """Remote host specification."""
+
     __slots__ = ('num_workers', 'is_ssh', 'host', 'port')
 
     def __init__(self, url):
