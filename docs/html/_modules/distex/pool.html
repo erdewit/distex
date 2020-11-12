@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>distex.pool &mdash; distex 0.7.0 documentation</title>
+  <title>distex.pool &mdash; distex 0.7.1 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
 
   
   
@@ -19,22 +22,20 @@
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -50,7 +51,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> distex
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> distex
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -91,6 +93,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -129,7 +132,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -149,21 +152,23 @@
            <div itemprop="articleBody">
             
   <h1>Source code for distex.pool</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">import</span> <span class="nn">concurrent.futures</span>
-<span class="kn">import</span> <span class="nn">collections.abc</span>
-<span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">IntEnum</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">suppress</span>
+<span></span><span class="sd">&quot;&quot;&quot;Execute tasks in a pool of local or remote worker processes.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">.worker</span> <span class="k">import</span> <span class="n">Worker</span>
-<span class="kn">from</span> <span class="nn">.slotpool</span> <span class="k">import</span> <span class="n">SlotPool</span>
-<span class="kn">from</span> <span class="nn">.serializer</span> <span class="k">import</span> <span class="n">ClientSerializer</span><span class="p">,</span> <span class="n">PickleType</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">util</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">concurrent.futures</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">util</span>
+<span class="kn">from</span> <span class="nn">.serializer</span> <span class="kn">import</span> <span class="n">ClientSerializer</span><span class="p">,</span> <span class="n">PickleType</span>
+<span class="kn">from</span> <span class="nn">.slotpool</span> <span class="kn">import</span> <span class="n">SlotPool</span>
+<span class="kn">from</span> <span class="nn">.worker</span> <span class="kn">import</span> <span class="n">Worker</span>
 
 
 <span class="k">class</span> <span class="nc">LoopType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
@@ -229,23 +234,23 @@
 
     <span class="ne">TimeoutError</span> <span class="o">=</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">TimeoutError</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">hosts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">qsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">initializer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">initargs</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(),</span>
-            <span class="n">localhost</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">localport</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">localhost</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">localport</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">lazy_create</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">worker_loop</span><span class="o">=</span><span class="n">LoopType</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-            <span class="n">func_pickle</span><span class="o">=</span><span class="n">PickleType</span><span class="o">.</span><span class="n">dill</span><span class="p">,</span>
-            <span class="n">data_pickle</span><span class="o">=</span><span class="n">PickleType</span><span class="o">.</span><span class="n">pickle</span><span class="p">):</span>
+            <span class="n">worker_loop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">LoopType</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">func_pickle</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">PickleType</span><span class="o">.</span><span class="n">dill</span><span class="p">,</span>
+            <span class="n">data_pickle</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">PickleType</span><span class="o">.</span><span class="n">pickle</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            num_workers: Number of local process workers. The default of</span>
-<span class="sd">              None will use the number of CPUs.</span>
+<span class="sd">              0 will use the number of CPUs.</span>
 <span class="sd">            hosts: List of remote host specification strings in the format</span>
 <span class="sd">              ``[ssh://][username@]hostname[:portnumber]/num_workers``.</span>
 
@@ -285,8 +290,7 @@
 <span class="sd">        .. _ssh-keygen: https://linux.die.net/man/1/ssh-keygen</span>
 <span class="sd">        .. _ssh-copy-id: https://linux.die.net/man/1/ssh-copy-id</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_num_workers</span> <span class="o">=</span> <span class="n">num_workers</span> <span class="k">if</span> <span class="n">num_workers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
-            <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_workers</span> <span class="o">=</span> <span class="n">num_workers</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hosts</span> <span class="o">=</span> <span class="p">[</span><span class="n">hosts</span><span class="p">]</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span> <span class="k">else</span> <span class="n">hosts</span> <span class="k">if</span> <span class="n">hosts</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_qsize</span> <span class="o">=</span> <span class="n">qsize</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="o">=</span> <span class="n">initializer</span>
@@ -319,23 +323,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span> <span class="o">=</span> <span class="n">SlotPool</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_called</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_excinfo</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_excinfo</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">__aenter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="fm">__aenter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_excinfo</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="fm">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_excinfo</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">shutdown_async</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__await__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__await__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">()</span><span class="o">.</span><span class="fm">__await__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Pool.create"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.create">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Coroutine to create local processors and servers and</span>
 <span class="sd">        start up remote processors.</span>
@@ -378,7 +382,7 @@
                 <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span><span class="p">]</span>
             <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ready</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
+        <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_start_unix_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># start server that listens on a Unix socket</span>
@@ -397,7 +401,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_tcp_server</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">create_server</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_create_worker</span><span class="p">,</span>
             <span class="n">localhost</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Started serving on port </span><span class="si">{self._localport}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Started serving on port </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_localport</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_add_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">is_ssh</span><span class="p">:</span>
@@ -441,17 +445,17 @@
             <span class="s1">&#39;ssh&#39;</span><span class="p">,</span>
             <span class="s1">&#39;-T&#39;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span>
             <span class="o">*</span><span class="n">port_arg</span><span class="p">,</span>
-            <span class="s1">&#39;-R&#39;</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{remote_unix_path}</span><span class="s1">:</span><span class="si">{self._unix_path}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;-R&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">remote_unix_path</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_unix_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
             <span class="n">stdin</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
             <span class="n">stderr</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
         <span class="c1"># spawn processors that will connect to the tunneled Unix server</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">f</span><span class="s1">&#39;distex_proc &#39;</span>
-            <span class="n">f</span><span class="s1">&#39;-u </span><span class="si">{remote_unix_path}</span><span class="s1"> &#39;</span>
-            <span class="n">f</span><span class="s1">&#39;-l </span><span class="si">{self._worker_loop}</span><span class="s1"> &#39;</span>
-            <span class="n">f</span><span class="s1">&#39;-f </span><span class="si">{self._func_pickle}</span><span class="s1"> &#39;</span>
-            <span class="n">f</span><span class="s1">&#39;-d </span><span class="si">{self._data_pickle}</span><span class="s1"> &#39;</span>
-            <span class="n">f</span><span class="s1">&#39;&amp; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span> <span class="o">*</span> <span class="n">num_workers</span>
+            <span class="sa">f</span><span class="s1">&#39;distex_proc &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;-u </span><span class="si">{</span><span class="n">remote_unix_path</span><span class="si">}</span><span class="s1"> &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;-l </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_worker_loop</span><span class="si">}</span><span class="s1"> &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;-f </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_func_pickle</span><span class="si">}</span><span class="s1"> &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;-d </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_pickle</span><span class="si">}</span><span class="s1"> &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;&amp; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span> <span class="o">*</span> <span class="n">num_workers</span>
         <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
         <span class="k">await</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_tunnels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proc</span><span class="p">)</span>
@@ -470,21 +474,19 @@
     <span class="k">def</span> <span class="nf">_on_worker_disconnected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="Pool.is_ready"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.is_ready">[docs]</a>    <span class="k">def</span> <span class="nf">is_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">is_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        True if the pool is ready to process tasks, false otherwise.</span>
 
 <span class="sd">        There is also the public ``ready`` event.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ready</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ready</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Pool.total_workers"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.total_workers">[docs]</a>    <span class="k">def</span> <span class="nf">total_workers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Total number of workers in the pool.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_workers</span></div>
+    <span class="k">def</span> <span class="nf">total_workers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Total number of workers in the pool.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_workers</span>
 
-<div class="viewcode-block" id="Pool.submit"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Submit the task to be run in the pool and return a</span>
 <span class="sd">        concurrent.futures.Future that will hold the result.</span>
@@ -495,23 +497,23 @@
         <span class="n">future</span> <span class="o">=</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">Future</span><span class="p">()</span>
         <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_async</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 
-        <span class="k">def</span> <span class="nf">on_task_done</span><span class="p">(</span><span class="n">task</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">exception</span><span class="p">():</span>
-                <span class="n">future</span><span class="o">.</span><span class="n">set_exception</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">exception</span><span class="p">())</span>
+        <span class="k">def</span> <span class="nf">on_task_done</span><span class="p">(</span><span class="n">task_</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">task_</span><span class="o">.</span><span class="n">exception</span><span class="p">():</span>
+                <span class="n">future</span><span class="o">.</span><span class="n">set_exception</span><span class="p">(</span><span class="n">task_</span><span class="o">.</span><span class="n">exception</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">future</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>
+                <span class="n">future</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="n">task_</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>
 
         <span class="n">task</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="n">on_task_done</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">future</span></div>
+        <span class="k">return</span> <span class="n">future</span>
 
-<div class="viewcode-block" id="Pool.map"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.map">[docs]</a>    <span class="k">def</span> <span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">iterables</span><span class="p">,</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">star</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">map</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">iterables</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">chunksize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ordered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">star</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Map the function onto the given iterable(s) and</span>
 <span class="sd">        return an iterator that yields the results.</span>
 
 <span class="sd">        Args:</span>
-
 <span class="sd">            func: Function to map. If it returns an awaitable then the</span>
 <span class="sd">              result is awaited and returned.</span>
 <span class="sd">            iterables: Sync or async iterables (in any combination)</span>
@@ -551,10 +553,10 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="k">yield from</span> <span class="n">run</span><span class="p">(</span><span class="n">nxt</span><span class="p">())</span>
-        <span class="k">except</span> <span class="n">StopAsyncIteration</span><span class="p">:</span>
-            <span class="k">pass</span></div>
+        <span class="k">except</span> <span class="ne">StopAsyncIteration</span><span class="p">:</span>
+            <span class="k">pass</span>
 
-<div class="viewcode-block" id="Pool.map_async"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.map_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">map_async</span><span class="p">(</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">map_async</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">iterables</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">chunksize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">star</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -568,7 +570,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">async</span> <span class="k">for</span> <span class="n">results</span> <span class="ow">in</span> <span class="n">agen</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
-                    <span class="k">yield</span> <span class="n">r</span></div>
+                    <span class="k">yield</span> <span class="n">r</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">iterables</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">,</span> <span class="n">ordered</span><span class="p">,</span> <span class="n">star</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_called</span><span class="p">:</span>
@@ -581,8 +583,7 @@
         <span class="n">run_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_task</span>
         <span class="n">input_consumed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">do_map</span> <span class="o">=</span> <span class="n">chunksize</span> <span class="o">&gt;</span> <span class="mi">1</span>
-        <span class="n">is_sync</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">iterables</span><span class="p">)</span>
+        <span class="n">is_sync</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">iterables</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">is_sync</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">iterables</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -614,7 +615,7 @@
                         <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                             <span class="n">create_task</span><span class="p">(</span>
                                 <span class="n">run_task</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">star</span><span class="p">,</span> <span class="n">do_map</span><span class="p">))))</span>
-                <span class="k">except</span> <span class="p">(</span><span class="ne">StopIteration</span><span class="p">,</span> <span class="n">StopAsyncIteration</span><span class="p">):</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">StopIteration</span><span class="p">,</span> <span class="ne">StopAsyncIteration</span><span class="p">):</span>
                     <span class="n">input_consumed</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">tasks</span> <span class="ow">and</span> <span class="n">input_consumed</span><span class="p">:</span>
@@ -646,20 +647,20 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">success</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">worker</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="ow">not</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">tasks</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="ow">not</span> <span class="n">worker</span><span class="o">.</span><span class="n">tasks</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">result</span>
         <span class="k">raise</span> <span class="n">result</span>
 
-<div class="viewcode-block" id="Pool.run"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the function with the given arguments</span>
 <span class="sd">        in the pool and wait for the result.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">run_async</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_async</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 
-<div class="viewcode-block" id="Pool.run_async"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.run_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Asynchronously run the function with the given arguments</span>
 <span class="sd">        in the pool and return the result when it becomes available.</span>
@@ -668,9 +669,9 @@
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">ready</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_task</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_task</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
 
-<div class="viewcode-block" id="Pool.run_on_all"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.run_on_all">[docs]</a>    <span class="k">def</span> <span class="nf">run_on_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run_on_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the task on each worker in the pool. Return a list of all results</span>
 <span class="sd">        (in order of completion) or raise an exception in case the task fails</span>
@@ -682,9 +683,9 @@
 <span class="sd">        This can be used for initializing, cleanup, intermittent polling, etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">run_on_all_async</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_on_all_async</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 
-<div class="viewcode-block" id="Pool.run_on_all_async"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.run_on_all_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">run_on_all_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">run_on_all_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Async version of ``run_on_all``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -701,7 +702,7 @@
         <span class="k">for</span> <span class="n">success</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">result</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">result</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="p">[</span><span class="n">result</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_drain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -712,7 +713,7 @@
         <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">slots</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_slots</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Pool.shutdown"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shutdown the pool and clean up resources.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -720,9 +721,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">is_running</span><span class="p">():</span>
             <span class="n">asyncio</span><span class="o">.</span><span class="n">ensure_future</span><span class="p">(</span><span class="n">coro</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">coro</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">coro</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Pool.shutdown_async"><a class="viewcode-back" href="../../api.html#distex.pool.Pool.shutdown_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">shutdown_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">shutdown_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_workers</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">wait</span><span class="p">:</span>
@@ -737,7 +738,7 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_unix_path</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp_server</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_tcp_server</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span></div>
 
 
 <span class="k">class</span> <span class="nc">RemoteException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -745,13 +746,13 @@
 <span class="sd">    Proxy for an exception that occurs remotely while running a task.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">tb</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">tb</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exc</span> <span class="o">=</span> <span class="n">exc</span>
         <span class="n">tb</span> <span class="o">=</span> <span class="n">tb</span> <span class="ow">or</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span>
             <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">exc</span><span class="p">,</span> <span class="n">exc</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tb</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tb</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tb</span>
 
     <span class="k">def</span> <span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -764,21 +765,20 @@
 
 
 <span class="k">class</span> <span class="nc">HostSpec</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remote host specification.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Remote host specification.&quot;&quot;&quot;</span>
+
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;num_workers&#39;</span><span class="p">,</span> <span class="s1">&#39;is_ssh&#39;</span><span class="p">,</span> <span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="s1">&#39;port&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parse the host url string.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">front</span><span class="p">,</span> <span class="n">ssh</span><span class="p">,</span> <span class="n">back</span><span class="p">,</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;ssh://&#39;</span><span class="p">)</span>
         <span class="n">h_p</span><span class="p">,</span> <span class="o">*</span><span class="n">nw</span> <span class="o">=</span> <span class="p">(</span><span class="n">back</span> <span class="k">if</span> <span class="n">ssh</span> <span class="k">else</span> <span class="n">front</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">h_p</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Bad server specification: </span><span class="si">{url}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Bad server specification: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">nw</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Specify num_workers for </span><span class="si">{url}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Specify num_workers for </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nw</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="o">*</span><span class="n">port</span> <span class="o">=</span> <span class="n">h_p</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">port</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">ssh</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">util</span><span class="o">.</span><span class="n">DEFAULT_PORT</span><span class="p">)</span>
@@ -795,11 +795,19 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Ewald de Wit
+        
+        &copy; Copyright 2020, Ewald de Wit
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -810,7 +818,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

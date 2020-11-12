@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Distex documentation &mdash; distex 0.7.0 documentation</title>
+  <title>Distex documentation &mdash; distex 0.7.1 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
 
   
   
@@ -19,22 +22,20 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Introduction" href="index.html" /> 
@@ -51,7 +52,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> distex
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> distex
           
 
           
@@ -78,6 +79,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -96,6 +98,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -134,7 +137,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Distex documentation</li>
     
@@ -157,14 +160,14 @@
             
   <div class="section" id="distex-documentation">
 <span id="api"></span><h1>Distex documentation<a class="headerlink" href="#distex-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Release 0.7.0.</p>
+<p>Release 0.7.1.</p>
 <div class="toctree-wrapper compound">
 </div>
 <div class="section" id="pool">
 <h2>Pool<a class="headerlink" href="#pool" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="distex.pool.Pool">
-<em class="property">class </em><code class="sig-prename descclassname">distex.pool.</code><code class="sig-name descname">Pool</code><span class="sig-paren">(</span><em class="sig-param">num_workers=None</em>, <em class="sig-param">hosts=None</em>, <em class="sig-param">qsize=2</em>, <em class="sig-param">initializer=None</em>, <em class="sig-param">initargs=()</em>, <em class="sig-param">localhost=None</em>, <em class="sig-param">localport=None</em>, <em class="sig-param">lazy_create=False</em>, <em class="sig-param">worker_loop=&lt;LoopType.default: 0&gt;</em>, <em class="sig-param">func_pickle=&lt;PickleType.dill: 2&gt;</em>, <em class="sig-param">data_pickle=&lt;PickleType.pickle: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">distex.pool.</code><code class="sig-name descname">Pool</code><span class="sig-paren">(</span><em class="sig-param">num_workers=0</em>, <em class="sig-param">hosts=None</em>, <em class="sig-param">qsize=2</em>, <em class="sig-param">initializer=None</em>, <em class="sig-param">initargs=()</em>, <em class="sig-param">localhost=''</em>, <em class="sig-param">localport=0</em>, <em class="sig-param">lazy_create=False</em>, <em class="sig-param">worker_loop=&lt;LoopType.default: 0&gt;</em>, <em class="sig-param">func_pickle=&lt;PickleType.dill: 2&gt;</em>, <em class="sig-param">data_pickle=&lt;PickleType.pickle: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pool of local and remote workers that can run tasks.</p>
 <p>To create a process pool of 4 local workers:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
@@ -205,8 +208,8 @@ use SSH keys instead: <a class="reference external" href="https://linux.die.net/
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>num_workers</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Number of local process workers. The default of
-None will use the number of CPUs.</p></li>
+<li><p><strong>num_workers</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Number of local process workers. The default of
+0 will use the number of CPUs.</p></li>
 <li><p><strong>hosts</strong> – List of remote host specification strings in the format
 <code class="docutils literal notranslate"><span class="pre">[ssh://][username&#64;]hostname[:portnumber]/num_workers</span></code>.</p></li>
 <li><p><strong>qsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Number of pending tasks per worker.
@@ -215,12 +218,12 @@ from the default of 2.
 If no queueing is desired then it can be set to 1.</p></li>
 <li><p><strong>initializer</strong> – Callable to initialize worker processes.</p></li>
 <li><p><strong>initargs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>) – Arguments tuple that is unpacked into the initializer.</p></li>
-<li><p><strong>localhost</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Local TCP server (if any) will listen on this address.</p></li>
-<li><p><strong>localport</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Local TCP server (if any) will listen on this port
+<li><p><strong>localhost</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Local TCP server (if any) will listen on this address.</p></li>
+<li><p><strong>localport</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Local TCP server (if any) will listen on this port
 (default: random open port).</p></li>
 <li><p><strong>lazy_create</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If True then no workers will be created until the
 first task is submitted.</p></li>
-<li><p><strong>worker_loop</strong> – <p><code class="docutils literal notranslate"><span class="pre">LoopType</span></code> to use for workers:</p>
+<li><p><strong>worker_loop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – <p><code class="docutils literal notranslate"><span class="pre">LoopType</span></code> to use for workers:</p>
 <blockquote>
 <div><ol class="arabic simple" start="0">
 <li><p>default (=uvloop when available, proactor on Windows)</p></li>
@@ -231,14 +234,14 @@ first task is submitted.</p></li>
 </ol>
 </div></blockquote>
 </p></li>
-<li><p><strong>func_pickle</strong> – <p><code class="docutils literal notranslate"><span class="pre">PickleType</span></code> to to use for serializing functions:</p>
+<li><p><strong>func_pickle</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – <p><code class="docutils literal notranslate"><span class="pre">PickleType</span></code> to to use for serializing functions:</p>
 <ol class="arabic simple" start="0">
 <li><p>pickle</p></li>
 <li><p>cloudpickle</p></li>
 <li><p>dill</p></li>
 </ol>
 </p></li>
-<li><p><strong>data_pickle</strong> – <p><code class="docutils literal notranslate"><span class="pre">PickleType</span></code> to to use for data:</p>
+<li><p><strong>data_pickle</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – <p><code class="docutils literal notranslate"><span class="pre">PickleType</span></code> to to use for data:</p>
 <ol class="arabic simple" start="0">
 <li><p>pickle</p></li>
 <li><p>cloudpickle</p></li>
@@ -250,153 +253,14 @@ first task is submitted.</p></li>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">distex.Pool</span></code> implements the <code class="docutils literal notranslate"><span class="pre">concurrent.futures.Executor</span></code>
 interface and can be used in the place of ProcessPoolExecutor.</p>
-<dl class="exception">
-<dt id="distex.pool.Pool.TimeoutError">
-<em class="property">exception </em><code class="sig-name descname">TimeoutError</code><a class="headerlink" href="#distex.pool.Pool.TimeoutError" title="Permalink to this definition">¶</a></dt>
-<dd><p>The operation exceeded the given deadline.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.create">
-<em class="property">async </em><code class="sig-name descname">create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.create" title="Permalink to this definition">¶</a></dt>
-<dd><p>Coroutine to create local processors and servers and
-start up remote processors.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.is_ready">
-<code class="sig-name descname">is_ready</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.is_ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.is_ready" title="Permalink to this definition">¶</a></dt>
-<dd><p>True if the pool is ready to process tasks, false otherwise.</p>
-<p>There is also the public <code class="docutils literal notranslate"><span class="pre">ready</span></code> event.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.total_workers">
-<code class="sig-name descname">total_workers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.total_workers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.total_workers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Total number of workers in the pool.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.submit">
-<code class="sig-name descname">submit</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.submit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Submit the task to be run in the pool and return a
-concurrent.futures.Future that will hold the result.</p>
-<p>This method is provided for compatibility with
-concurrent.futures.Executor.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.map">
-<code class="sig-name descname">map</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">*iterables</em>, <em class="sig-param">timeout=None</em>, <em class="sig-param">chunksize=1</em>, <em class="sig-param">ordered=True</em>, <em class="sig-param">star=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.map" title="Permalink to this definition">¶</a></dt>
-<dd><p>Map the function onto the given iterable(s) and
-return an iterator that yields the results.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>func</strong> – Function to map. If it returns an awaitable then the
-result is awaited and returned.</p></li>
-<li><p><strong>iterables</strong> – Sync or async iterables (in any combination)
-that yield the arguments for <code class="docutils literal notranslate"><span class="pre">func</span></code>. The iterables can
-be unbounded (i.e. they don’t need to have a length).</p></li>
-<li><p><strong>timeout</strong> – Timeout in seconds since map is started.</p></li>
-<li><p><strong>chunksize</strong> – Iterator is chunked up to this size.
-A larger chunksize can greatly improve efficiency
-for small tasks.</p></li>
-<li><p><strong>ordered</strong> – <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: The order of results preserves the
-order of the input iterables.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: The results are in order of completion.</p></li>
-</ul>
-</p></li>
-<li><p><strong>star</strong> – <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: There can be only one iterable and it must
-yield sequences (such as tuples). The sequences are
-unpacked (‘starred’) into <code class="docutils literal notranslate"><span class="pre">func</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: The values that the iterators yield are
-supplied in-place to <code class="docutils literal notranslate"><span class="pre">func</span></code>.</p></li>
-</ul>
-</p></li>
-</ul>
-</dd>
-</dl>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>The function <code class="docutils literal notranslate"><span class="pre">func</span></code> is is pickled only once and then cached.
-If it takes arguments that remain constant during the mapping then
-consider using <code class="docutils literal notranslate"><span class="pre">functools.partial</span></code> to bind the function with the
-constant arguments; Then do the mapping with the bound function and
-with lesser arguments. Especially when map uses large constant
-datasets this can be beneficial.</p>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.map_async">
-<code class="sig-name descname">map_async</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">*iterables</em>, <em class="sig-param">timeout=None</em>, <em class="sig-param">chunksize=1</em>, <em class="sig-param">ordered=True</em>, <em class="sig-param">star=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.map_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.map_async" title="Permalink to this definition">¶</a></dt>
-<dd><p>Async version of <code class="docutils literal notranslate"><span class="pre">map</span></code>. This runs with less overhead than <code class="docutils literal notranslate"><span class="pre">map</span></code>
-and can be twice as fast for small tasks.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run the function with the given arguments
-in the pool and wait for the result.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.run_async">
-<em class="property">async </em><code class="sig-name descname">run_async</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.run_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.run_async" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asynchronously run the function with the given arguments
-in the pool and return the result when it becomes available.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.run_on_all">
-<code class="sig-name descname">run_on_all</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.run_on_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.run_on_all" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run the task on each worker in the pool. Return a list of all results
-(in order of completion) or raise an exception in case the task fails
-on one or more workers.</p>
-<p>Will first wait for any other pending tasks to finish and then
-schedule the task over all workers at the same time.</p>
-<p>This can be used for initializing, cleanup, intermittent polling, etc.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.run_on_all_async">
-<em class="property">async </em><code class="sig-name descname">run_on_all_async</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.run_on_all_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.run_on_all_async" title="Permalink to this definition">¶</a></dt>
-<dd><p>Async version of <code class="docutils literal notranslate"><span class="pre">run_on_all</span></code>.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.shutdown">
-<code class="sig-name descname">shutdown</code><span class="sig-paren">(</span><em class="sig-param">wait=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.shutdown" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shutdown the pool and clean up resources.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="distex.pool.Pool.shutdown_async">
-<em class="property">async </em><code class="sig-name descname">shutdown_async</code><span class="sig-paren">(</span><em class="sig-param">wait=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/pool.html#Pool.shutdown_async"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.pool.Pool.shutdown_async" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 </div>
 <div class="section" id="poolmap">
 <h2>PoolMap<a class="headerlink" href="#poolmap" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="distex.poolmap.PoolMap">
-<em class="property">class </em><code class="sig-prename descclassname">distex.poolmap.</code><code class="sig-name descname">PoolMap</code><span class="sig-paren">(</span><em class="sig-param">pool</em>, <em class="sig-param">func</em>, <em class="sig-param">timeout=None</em>, <em class="sig-param">chunksize=1</em>, <em class="sig-param">ordered=True</em>, <em class="sig-param">source=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/poolmap.html#PoolMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.poolmap.PoolMap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">distex.poolmap.</code><code class="sig-name descname">PoolMap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pool</span></em>, <em class="sig-param"><span class="n">func</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">chunksize</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ordered</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">source</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/poolmap.html#PoolMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.poolmap.PoolMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Map a function using a distributed pool with
 <a class="reference external" href="https://github.com/erdewit/eventkit">eventkit</a>.</p>
 <dl class="field-list simple">
@@ -416,11 +280,6 @@ for small tasks.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="method">
-<dt id="distex.poolmap.PoolMap.set_source">
-<code class="sig-name descname">set_source</code><span class="sig-paren">(</span><em class="sig-param">source</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/distex/poolmap.html#PoolMap.set_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#distex.poolmap.PoolMap.set_source" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 </div>
@@ -444,11 +303,19 @@ for small tasks.</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Ewald de Wit
+        
+        &copy; Copyright 2020, Ewald de Wit
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -459,7 +326,6 @@ for small tasks.</p></li>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
