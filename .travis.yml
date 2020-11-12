@@ -13,6 +13,7 @@ install:
   - if [[ "$LOOP" != "asyncio" ]]; then pip install $LOOP; fi;
   - pip install .
   - pip install -r requirements.txt
+  - pip install flake8 mypy
 script:
   - python3 tests/pool_test.py
   - flake8 distex
