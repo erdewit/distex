@@ -1,3 +1,4 @@
+dist: focal  # ubuntu 20.04
 language: python
 sudo: false
 python:
