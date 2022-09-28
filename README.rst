@@ -115,8 +115,7 @@ There is full support for every asynchronous construct imaginable:
             print(await pool.run_on_all_async(timer))
 
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())
 
 
 High level architecture
