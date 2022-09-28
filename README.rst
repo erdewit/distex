@@ -162,9 +162,9 @@ Documentation
    :alt: PyPi
    :target: https://pypi.python.org/pypi/distex
 
-.. |Build| image:: https://travis-ci.org/erdewit/distex.svg?branch=master
+.. |Build| image:: https://github.com/erdewit/distex/actions/workflows/test.yml/badge.svg?branch=master
    :alt: Build
-   :target: https://travis-ci.org/erdewit/distex
+   :target: https://github.com/erdewit/distex/actions
 
 .. |PyVersion| image:: https://img.shields.io/badge/python-3.6+-blue.svg
    :alt:

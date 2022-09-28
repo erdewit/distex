@@ -112,7 +112,8 @@ class PoolTest(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             expected = g(10, 9, z=8)
             f = self.pool.submit(g, 10, 9, z=8)
-            actual = loop.run_until_complete(asyncio.wrap_future(f))
+            f2 = asyncio.wrap_future(f, loop=loop)
+            actual = loop.run_until_complete(f2)
             self.assertEqual(actual, expected)
 
             self.assertNoWarnings(w)
@@ -120,8 +121,9 @@ class PoolTest(unittest.TestCase):
     def test_submit_with_exception(self):
         with warnings.catch_warnings(record=True) as w:
             f = self.pool.submit(exc, 'Okay then')
+            f2 = asyncio.wrap_future(f, loop=loop)
             with self.assertRaises(RuntimeError):
-                loop.run_until_complete(asyncio.wrap_future(f))
+                loop.run_until_complete(f2)
 
             self.assertNoWarnings(w)
 
