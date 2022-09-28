@@ -17,7 +17,7 @@ class Server:
     def __init__(self, host='0.0.0.0', port=util.DEFAULT_PORT):
         self._host = host
         self._port = port
-        self._loop = asyncio.get_event_loop()
+        self._loop = asyncio.get_event_loop_policy().get_event_loop()
         self._server = None
         self._logger = logging.getLogger('distex.Server')
         self._loop.run_until_complete(self.create())

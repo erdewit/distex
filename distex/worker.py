@@ -15,7 +15,7 @@ class Worker(asyncio.Protocol):
 
     def __init__(self, serializer):
         self.serializer = serializer
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_event_loop_policy().get_event_loop()
         self.transport = None
         self.peername = ''
         self.disconnected = None

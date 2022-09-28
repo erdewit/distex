@@ -88,7 +88,7 @@ def get_loop():
         with suppress(ImportError):
             import uvloop
             loop = uvloop.Loop()
-    return loop or asyncio.get_event_loop()
+    return loop or asyncio.get_event_loop_policy().get_event_loop()
 
 
 def single_step(loop):

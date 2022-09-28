@@ -143,7 +143,7 @@ class Pool:
         self._initargs = initargs
         self._localhost = localhost
         self._localport = localport
-        self._loop = asyncio.get_event_loop()
+        self._loop = asyncio.get_event_loop_policy().get_event_loop()
         self._worker_loop = int(worker_loop)
         self._func_pickle = int(func_pickle)
         self._data_pickle = int(data_pickle)

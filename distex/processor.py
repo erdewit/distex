@@ -19,7 +19,7 @@ class Processor(asyncio.Protocol):
         self._host = host
         self._port = port
         self._unix_path = unix_path
-        self._loop = asyncio.get_event_loop()
+        self._loop = asyncio.get_event_loop_policy().get_event_loop()
         self._data_q = asyncio.Queue()
         self._transport = None
         self._last_func = None
@@ -117,7 +117,7 @@ def main():
     if args.loop == LoopType.default:
         loop = util.get_loop()
     elif args.loop == LoopType.asyncio:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_event_loop_policy().get_event_loop()
     elif args.loop == LoopType.uvloop:
         import uvloop
         loop = uvloop.Loop()

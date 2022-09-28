@@ -15,7 +15,7 @@ class SlotPool:
         self.num_free = 0
         self.capacity = 0
         self._slots = deque()
-        self._loop = asyncio.get_event_loop()
+        self._loop = asyncio.get_event_loop_policy().get_event_loop()
         self._get_waiters = deque()
         self._slot_ready_waiter = None
 
